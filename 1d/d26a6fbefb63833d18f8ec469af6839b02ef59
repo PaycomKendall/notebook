@@ -1,0 +1,24 @@
+internal/adapter/tui/forms.go
+  s_cee99dc4d9ea23::t_a7c2c18f873eab 162-184
+internal/adapter/tui/app.go
+  s_cee99dc4d9ea23::t_a50d03677fd71b 297-301
+  s_cee99dc4d9ea23::t_f7b9a686174e56 74
+internal/adapter/tui/move_test.go
+  s_cee99dc4d9ea23::t_eb36d675f8d7e8 1-25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "1dd26a6fbefb63833d18f8ec469af6839b02ef59",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
