@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - **Module path:** `github.com/kendallowen/notebook`.
-- **Go version floor:** 1.22 (in `go.mod`).
+- **Go version floor:** originally 1.22; raised to **1.24** in `go.mod` once `tview`/`tcell` were added (their MVS minimum). No `toolchain` line. Accepted dependency-driven bump.
 - **Dependency rule:** `internal/todo` imports no other project package and no `cobra`/`tview`/`tcell`. `jsonstore` imports only `internal/todo` + stdlib. `cli`/`tui` import `internal/todo` (+ their framework). Only `cmd/nb/main.go` imports adapters.
 - **Storage:** one pretty-printed JSON file per list at `<dir>/<name>.json`; dir resolved `NB_DIR` → `$XDG_DATA_HOME/notebook` → `~/.local/share/notebook`. Writes are atomic (temp file + rename).
 - **Task fields:** `ID, Title, Done, Tags, Notes, Created, Updated`. No priority/due date.
@@ -2558,7 +2558,6 @@ import (
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/kendallowen/notebook/internal/todo"
 )
 
 func TestToggleKeyMarksTaskDone(t *testing.T) {
