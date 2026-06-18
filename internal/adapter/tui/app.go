@@ -20,6 +20,9 @@ type App struct {
 
 	listNames []string
 	current   *todo.List // currently displayed list
+
+	focusIdx int
+	panes    []tview.Primitive
 }
 
 // New creates a TUI App.
@@ -141,7 +144,110 @@ func (a *App) Run() error {
 	return a.app.Run()
 }
 
-// bindKeys is implemented in Task 15; defined here so Run compiles.
-func (a *App) bindKeys() {}
+// focus sets the focused pane by index (0=lists,1=tasks,2=detail).
+func (a *App) focus(i int) {
+	if a.panes == nil {
+		a.panes = []tview.Primitive{a.lists, a.tasks, a.detail}
+	}
+	if i < 0 || i >= len(a.panes) {
+		return
+	}
+	a.focusIdx = i
+	a.app.SetFocus(a.panes[i])
+}
 
-var _ = tcell.KeyTab
+// cycleFocus moves focus by delta with wraparound.
+func (a *App) cycleFocus(delta int) {
+	n := 3
+	a.focus(((a.focusIdx+delta)%n + n) % n)
+}
+
+// toggleSelected flips the done state of the selected task and refreshes.
+func (a *App) toggleSelected() {
+	t := a.selectedTask()
+	if t == nil || a.current == nil {
+		return
+	}
+	if err := a.svc.ToggleTask(a.current.Name, t.ID); err != nil {
+		return
+	}
+	idx := a.tasks.GetCurrentItem()
+	a.refreshTasks()
+	if idx < a.tasks.GetItemCount() {
+		a.tasks.SetCurrentItem(idx)
+	}
+	a.refreshDetail()
+}
+
+// deleteSelected removes the selected task after confirmation.
+func (a *App) deleteSelected() {
+	t := a.selectedTask()
+	if t == nil || a.current == nil {
+		return
+	}
+	name, id := a.current.Name, t.ID
+	a.confirm(fmt.Sprintf("Delete #%d %q?", id, t.Title), func() {
+		_ = a.svc.RemoveTask(name, id)
+		a.refreshTasks()
+		a.refreshDetail()
+	})
+}
+
+// bindKeys installs global and pane key handlers.
+func (a *App) bindKeys() {
+	a.panes = []tview.Primitive{a.lists, a.tasks, a.detail}
+	a.app.SetInputCapture(func(ev *tcell.EventKey) *tcell.EventKey {
+		switch ev.Key() {
+		case tcell.KeyTab:
+			a.cycleFocus(1)
+			return nil
+		case tcell.KeyBacktab:
+			a.cycleFocus(-1)
+			return nil
+		case tcell.KeyCtrlC:
+			a.app.Stop()
+			return nil
+		}
+		switch ev.Rune() {
+		case 'q':
+			a.app.Stop()
+			return nil
+		case 'a':
+			if a.focusIdx == 0 {
+				a.newListForm()
+			} else {
+				a.addTaskForm()
+			}
+			return nil
+		case 'd':
+			if a.focusIdx == 1 {
+				a.toggleSelected()
+			}
+			return nil
+		case 'x':
+			if a.focusIdx == 0 {
+				a.deleteSelectedList()
+			} else if a.focusIdx == 1 {
+				a.deleteSelected()
+			}
+			return nil
+		case 'r':
+			if a.focusIdx == 0 {
+				a.renameListForm()
+			}
+			return nil
+		case 'e':
+			if a.focusIdx == 1 {
+				a.editTaskForm()
+			}
+			return nil
+		case 'n':
+			if a.focusIdx == 1 {
+				a.editTaskForm()
+			}
+			return nil
+		}
+		return ev
+	})
+	a.focus(0)
+}
