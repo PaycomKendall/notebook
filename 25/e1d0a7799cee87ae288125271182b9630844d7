@@ -1,0 +1,25 @@
+docs/superpowers/plans/2026-06-18-todo-cli-tui.md
+  s_cee99dc4d9ea23::t_137aa050c169dd 1-1046,1062-2672,2676,2682-2707,2709-2806,2844-2932,2934-2961,2966-2969
+  s_cee99dc4d9ea23::t_cee3f866980799 1047-1061
+  s_cee99dc4d9ea23::t_1be5a1b005acaa 2673-2675,2677-2681
+  s_cee99dc4d9ea23::t_d9144ccfaec3e1 2807-2843
+  s_cee99dc4d9ea23::t_c1863ec9e11c38 2962-2965
+  s_cee99dc4d9ea23::t_d5184d22789beb 2933
+  s_cee99dc4d9ea23::t_3d86ee5a14ee41 2708
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "25e1d0a7799cee87ae288125271182b9630844d7",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
