@@ -1,0 +1,34 @@
+internal/adapter/bubbletui/forms.go
+  s_cee99dc4d9ea23::t_b9827336bc69fc 219,223,225,227,231-233
+internal/adapter/bubbletui/theme.go
+  s_cee99dc4d9ea23::t_7fa56897ef9e7d 1-23
+internal/adapter/bubbletui/model.go
+  s_cee99dc4d9ea23::t_6fccb4687f9ae5 51-52
+  s_cee99dc4d9ea23::t_3e50733bd7786e 55-57
+  s_cee99dc4d9ea23::t_cbeac908b42e6b 123
+internal/adapter/bubbletui/theme_test.go
+  s_cee99dc4d9ea23::t_c4fbca160b1ca0 1-16
+internal/adapter/bubbletui/view.go
+  s_cee99dc4d9ea23::t_b01ccdb85ecfc7 50,53,58,60,72,84,90,92,100,104,106,108,110,115-116,120,127,131,133,135
+internal/adapter/bubbletui/styles.go
+  s_cee99dc4d9ea23::t_49a68677669f8b 5-9,11-13,20-24
+  s_cee99dc4d9ea23::t_1791d465770788 14-19
+internal/adapter/bubbletui/model_test.go
+  s_cee99dc4d9ea23::t_abcab8392506c6 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "def2836ec8c459691aa6f04a09eeba1d641b1b1f",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
