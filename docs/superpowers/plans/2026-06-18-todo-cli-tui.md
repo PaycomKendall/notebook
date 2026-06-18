@@ -977,7 +977,7 @@ func (s *Service) RenameList(old, newName string) error {
 	if err != nil {
 		return err
 	}
-	newName, err := NormalizeListName(newName)
+	newName, err = NormalizeListName(newName)
 	if err != nil {
 		return err
 	}
