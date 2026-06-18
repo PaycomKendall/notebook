@@ -1,0 +1,23 @@
+internal/adapter/cli/lists.go
+  s_cee99dc4d9ea23::t_50cb7cdf10bb92 1-85
+internal/adapter/cli/cli_lists_test.go
+  s_cee99dc4d9ea23::t_f3f4e8845c7e42 1-43
+internal/adapter/cli/cli.go
+  s_cee99dc4d9ea23::t_ac2b5ebb1ca7ef 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "c36f5206275a74adf9ad5bb3e8382def5726d18f",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
