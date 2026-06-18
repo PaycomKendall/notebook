@@ -44,6 +44,47 @@ func (s *Service) AddTask(list, title string, tags []string, notes string) (Task
 	return *t, nil
 }
 
+// MoveTask moves a task from srcList to destList (auto-creating dest). The task
+// keeps its fields but receives a fresh ID in the destination. src == dest is a
+// no-op. Returns the moved task.
+func (s *Service) MoveTask(srcList string, id int, destList string) (Task, error) {
+	src, err := NormalizeListName(srcList)
+	if err != nil {
+		return Task{}, err
+	}
+	dest, err := NormalizeListName(destList)
+	if err != nil {
+		return Task{}, err
+	}
+	sl, err := s.repo.Load(src)
+	if err != nil {
+		return Task{}, err
+	}
+	t, err := sl.Get(id)
+	if err != nil {
+		return Task{}, err
+	}
+	moved := *t
+	if src == dest {
+		return moved, nil
+	}
+	dl, err := s.loadOrCreate(dest)
+	if err != nil {
+		return Task{}, err
+	}
+	added := dl.Append(moved)
+	if err := sl.Remove(id); err != nil {
+		return Task{}, err
+	}
+	if err := s.repo.Save(dl); err != nil {
+		return Task{}, err
+	}
+	if err := s.repo.Save(sl); err != nil {
+		return Task{}, err
+	}
+	return *added, nil
+}
+
 // GetList returns a list by canonical name (ErrListNotFound if absent).
 func (s *Service) GetList(name string) (*List, error) {
 	name, err := NormalizeListName(name)
