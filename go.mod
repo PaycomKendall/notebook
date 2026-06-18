@@ -1,3 +1,3 @@
-module github.com/kendallowen/todo
+module github.com/kendallowen/notebook
 
 go 1.22
