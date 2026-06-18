@@ -1,0 +1,21 @@
+internal/adapter/jsonstore/store.go
+  s_cee99dc4d9ea23::t_f351e00efa82c7 1-115
+internal/adapter/jsonstore/store_test.go
+  s_cee99dc4d9ea23::t_0241b857e1bda8 1-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "4f555b6da7a0afcb6311de92005de12159e9951a",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
