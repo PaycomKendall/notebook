@@ -107,3 +107,32 @@ func (s *Service) AddTaskTag(list string, id int, tag string) error {
 func (s *Service) RemoveTaskTag(list string, id int, tag string) error {
 	return s.mutate(list, func(l *List) error { return l.RemoveTag(id, tag) })
 }
+
+func (s *Service) CreateList(name string) error {
+	name, err := NormalizeListName(name)
+	if err != nil {
+		return err
+	}
+	_, err = s.repo.Create(name)
+	return err
+}
+
+func (s *Service) DeleteList(name string) error {
+	name, err := NormalizeListName(name)
+	if err != nil {
+		return err
+	}
+	return s.repo.Delete(name)
+}
+
+func (s *Service) RenameList(old, newName string) error {
+	oldName, err := NormalizeListName(old)
+	if err != nil {
+		return err
+	}
+	newName, err = NormalizeListName(newName)
+	if err != nil {
+		return err
+	}
+	return s.repo.Rename(oldName, newName)
+}
