@@ -1,0 +1,25 @@
+internal/todo/service_move_test.go
+  s_cee99dc4d9ea23::t_660876eb039adc 1-57
+internal/todo/list.go
+  s_cee99dc4d9ea23::t_7d7dda3953942d 31-47
+internal/todo/list_append_test.go
+  s_cee99dc4d9ea23::t_98349633a67f29 1-38
+internal/todo/service.go
+  s_cee99dc4d9ea23::t_5c9aa3fbe9a1f7 47-87
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "d1f9da0b1bd0221e2011292335aa7d60e7369e99",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
