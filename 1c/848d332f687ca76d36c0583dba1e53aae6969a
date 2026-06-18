@@ -1,0 +1,31 @@
+internal/adapter/cli/cli_help_test.go
+  s_cee99dc4d9ea23::t_679d0b48ead53f 22
+internal/adapter/cli/cli_engine_test.go
+  s_cee99dc4d9ea23::t_020ee7766f0914 1-44
+cmd/nb/main.go
+  s_cee99dc4d9ea23::t_d48ae14f984918 23-26
+  s_cee99dc4d9ea23::t_6aacd6a2865805 7
+internal/adapter/cli/cli_robust_test.go
+  s_cee99dc4d9ea23::t_02df76ff19b5b4 25
+internal/adapter/cli/cli.go
+  s_cee99dc4d9ea23::t_5904dff9e86679 32-51,62,66-72,74
+  s_cee99dc4d9ea23::t_465c20c1b0bc4a 4
+internal/adapter/cli/cli_test.go
+  s_cee99dc4d9ea23::t_35c793de17bc34 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "1c848d332f687ca76d36c0583dba1e53aae6969a",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
