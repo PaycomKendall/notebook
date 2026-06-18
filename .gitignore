@@ -1,0 +1,11 @@
+# Binaries
+/todo
+/todo-*
+dist/
+
+# Go
+*.test
+*.out
+
+# OS
+.DS_Store
