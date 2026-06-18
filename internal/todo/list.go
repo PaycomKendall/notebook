@@ -78,3 +78,67 @@ func (l *List) Remove(id int) error {
 	l.Tasks = append(l.Tasks[:i], l.Tasks[i+1:]...)
 	return nil
 }
+
+// SetTitle updates a task title (non-empty after trim).
+func (l *List) SetTitle(id int, title string) error {
+	i := l.index(id)
+	if i < 0 {
+		return ErrTaskNotFound
+	}
+	title = strings.TrimSpace(title)
+	if title == "" {
+		return ErrEmptyTitle
+	}
+	l.Tasks[i].Title = title
+	l.Tasks[i].Updated = time.Now()
+	return nil
+}
+
+// SetNotes replaces a task's notes.
+func (l *List) SetNotes(id int, notes string) error {
+	i := l.index(id)
+	if i < 0 {
+		return ErrTaskNotFound
+	}
+	l.Tasks[i].Notes = notes
+	l.Tasks[i].Updated = time.Now()
+	return nil
+}
+
+// AddTag adds a normalized tag, ignoring blanks and duplicates.
+func (l *List) AddTag(id int, tag string) error {
+	i := l.index(id)
+	if i < 0 {
+		return ErrTaskNotFound
+	}
+	tag = normalizeTag(tag)
+	if tag == "" {
+		return nil
+	}
+	for _, existing := range l.Tasks[i].Tags {
+		if existing == tag {
+			return nil
+		}
+	}
+	l.Tasks[i].Tags = append(l.Tasks[i].Tags, tag)
+	l.Tasks[i].Updated = time.Now()
+	return nil
+}
+
+// RemoveTag removes a normalized tag if present.
+func (l *List) RemoveTag(id int, tag string) error {
+	i := l.index(id)
+	if i < 0 {
+		return ErrTaskNotFound
+	}
+	tag = normalizeTag(tag)
+	out := l.Tasks[i].Tags[:0]
+	for _, existing := range l.Tasks[i].Tags {
+		if existing != tag {
+			out = append(out, existing)
+		}
+	}
+	l.Tasks[i].Tags = out
+	l.Tasks[i].Updated = time.Now()
+	return nil
+}
