@@ -47,17 +47,17 @@ func (m *Model) normalView() string {
 func (m *Model) renderLists() string {
 	lw, _, _ := m.paneWidths()
 	var b strings.Builder
-	b.WriteString(titleStyle.Render("Lists") + "\n\n")
+	b.WriteString(m.styles.title.Render("Lists") + "\n\n")
 	for i, name := range m.listNames {
 		if i == m.listIdx {
-			b.WriteString(selStyle.Render("❯ "+name) + "\n")
+			b.WriteString(m.styles.sel.Render("❯ "+name) + "\n")
 		} else {
 			b.WriteString("  " + name + "\n")
 		}
 	}
-	style := paneStyle
+	style := m.styles.pane
 	if m.focus == focusLists {
-		style = paneFocused
+		style = m.styles.paneFocused
 	}
 	return style.Width(lw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
 }
@@ -69,7 +69,7 @@ func (m *Model) renderTasks() string {
 		title = "Tasks · " + n
 	}
 	var b strings.Builder
-	b.WriteString(titleStyle.Render(title) + "\n\n")
+	b.WriteString(m.styles.title.Render(title) + "\n\n")
 	if m.current != nil {
 		for i, task := range m.current.Tasks {
 			box := "[ ]"
@@ -81,15 +81,15 @@ func (m *Model) renderTasks() string {
 				line += "  #" + strings.Join(task.Tags, " #")
 			}
 			if i == m.taskIdx {
-				b.WriteString(selStyle.Render("❯ "+line) + "\n")
+				b.WriteString(m.styles.sel.Render("❯ "+line) + "\n")
 			} else {
 				b.WriteString("  " + line + "\n")
 			}
 		}
 	}
-	style := paneStyle
+	style := m.styles.pane
 	if m.focus == focusTasks {
-		style = paneFocused
+		style = m.styles.paneFocused
 	}
 	return style.Width(tw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
 }
@@ -97,41 +97,41 @@ func (m *Model) renderTasks() string {
 func (m *Model) renderDetail() string {
 	_, _, dw := m.paneWidths()
 	var b strings.Builder
-	b.WriteString(titleStyle.Render("Detail") + "\n\n")
+	b.WriteString(m.styles.title.Render("Detail") + "\n\n")
 	if t := m.selectedTask(); t != nil {
 		b.WriteString(lipgloss.NewStyle().Bold(true).Render(t.Title) + "\n")
 		if len(t.Tags) > 0 {
-			b.WriteString(tagStyle.Render("#"+strings.Join(t.Tags, " #")) + "\n")
+			b.WriteString(m.styles.tag.Render("#"+strings.Join(t.Tags, " #")) + "\n")
 		}
-		b.WriteString("\n" + dimStyle.Render("Notes") + "\n" + t.Notes)
+		b.WriteString("\n" + m.styles.dim.Render("Notes") + "\n" + t.Notes)
 	}
-	style := paneStyle
+	style := m.styles.pane
 	if m.focus == focusDetail {
-		style = paneFocused
+		style = m.styles.paneFocused
 	}
 	return style.Width(dw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
 }
 
-// hint builds a footer line from key/label pairs.
-func hint(pairs [][2]string) string {
+// hint builds a footer line from key/label pairs using the model's styles.
+func (m *Model) hint(pairs [][2]string) string {
 	var b strings.Builder
 	b.WriteString(" ")
 	for _, p := range pairs {
-		b.WriteString(keyStyle.Render(p[0]) + dimStyle.Render(" "+p[1]+"  "))
+		b.WriteString(m.styles.key.Render(p[0]) + m.styles.dim.Render(" "+p[1]+"  "))
 	}
 	return strings.TrimRight(b.String(), " ")
 }
 
 func (m *Model) footer() string {
 	if m.status != "" {
-		return warnStyle.Render(" " + m.status)
+		return m.styles.warn.Render(" " + m.status)
 	}
 	switch m.focus {
 	case focusLists:
-		return hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "new"}, {"r", "rename"}, {"x", "delete"}, {"q", "quit"}})
+		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "new"}, {"r", "rename"}, {"x", "delete"}, {"q", "quit"}})
 	case focusTasks:
-		return hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "add"}, {"d", "done"}, {"e", "edit"}, {"x", "delete"}, {"q", "quit"}})
+		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "add"}, {"d", "done"}, {"e", "edit"}, {"x", "delete"}, {"q", "quit"}})
 	default:
-		return hint([][2]string{{"tab", "pane"}, {"q", "quit"}})
+		return m.hint([][2]string{{"tab", "pane"}, {"q", "quit"}})
 	}
 }

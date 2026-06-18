@@ -22,7 +22,7 @@ func TestListsAndLsAllSkipUnloadableFiles(t *testing.T) {
 	}
 	svc := todo.NewService(store)
 	run := func(args ...string) (string, error) {
-		cmd := NewRootCmd(svc, func(string) error { return nil })
+		cmd := NewRootCmd(svc, func(string, string) error { return nil })
 		var buf bytes.Buffer
 		cmd.SetOut(&buf)
 		cmd.SetErr(&buf)

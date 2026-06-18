@@ -48,7 +48,7 @@ func resolveEngine(flag string) (string, error) {
 
 // NewRootCmd builds the command tree. launchTUI runs the interactive UI for
 // the chosen engine; bare `nb` prints help.
-func NewRootCmd(svc *todo.Service, launchTUI func(engine string) error) *cobra.Command {
+func NewRootCmd(svc *todo.Service, launchTUI func(engine, theme string) error) *cobra.Command {
 	root := &cobra.Command{
 		Use:           "nb",
 		Short:         "notebook — a CLI + TUI task tracker",
@@ -59,7 +59,7 @@ func NewRootCmd(svc *todo.Service, launchTUI func(engine string) error) *cobra.C
 			return cmd.Help()
 		},
 	}
-	var engine string
+	var engine, theme string
 	tui := &cobra.Command{
 		Use:   "tui",
 		Short: "Launch the interactive TUI",
@@ -68,10 +68,18 @@ func NewRootCmd(svc *todo.Service, launchTUI func(engine string) error) *cobra.C
 			if err != nil {
 				return err
 			}
-			return launchTUI(eng)
+			th := theme
+			if th == "" {
+				th = os.Getenv("NB_THEME")
+			}
+			if th == "" {
+				th = "default"
+			}
+			return launchTUI(eng, th)
 		},
 	}
 	tui.Flags().StringVarP(&engine, "engine", "e", "", `TUI engine: "tview" (default) or "bubble"; or $NB_TUI`)
+	tui.Flags().StringVar(&theme, "theme", "", `bubble theme: default, nord, dracula, gruvbox, mono; or $NB_THEME`)
 	root.AddCommand(tui)
 	root.AddCommand(newAddCmd(svc))
 	root.AddCommand(newLsCmd(svc))

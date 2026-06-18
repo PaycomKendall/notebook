@@ -20,9 +20,9 @@ func main() {
 	}
 	svc := todo.NewService(store)
 
-	launchTUI := func(engine string) error {
+	launchTUI := func(engine, theme string) error {
 		if engine == "bubble" {
-			return bubbletui.Run(svc)
+			return bubbletui.Run(svc, theme)
 		}
 		return tui.New(svc).Run()
 	}

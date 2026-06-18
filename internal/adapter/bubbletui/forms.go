@@ -216,19 +216,19 @@ func (m *Model) formTitle() string {
 
 func (m *Model) formView() string {
 	var b strings.Builder
-	b.WriteString(titleStyle.Render(m.formTitle()) + "\n\n")
+	b.WriteString(m.styles.title.Render(m.formTitle()) + "\n\n")
 	for i := range m.inputs {
 		b.WriteString(m.inputs[i].View() + "\n")
 	}
-	b.WriteString("\n" + dimStyle.Render("tab/↑↓: move · enter: submit · esc: cancel"))
+	b.WriteString("\n" + m.styles.dim.Render("tab/↑↓: move · enter: submit · esc: cancel"))
 	if m.status != "" {
-		b.WriteString("\n" + warnStyle.Render(m.status))
+		b.WriteString("\n" + m.styles.warn.Render(m.status))
 	}
-	return modalStyle.Render(b.String())
+	return m.styles.modal.Render(b.String())
 }
 
 func (m *Model) confirmView() string {
-	body := titleStyle.Render("Confirm") + "\n\n" + m.confirmPrompt + "\n\n" +
-		dimStyle.Render("y/enter: yes · n/esc: no")
-	return modalStyle.Render(body)
+	body := m.styles.title.Render("Confirm") + "\n\n" + m.confirmPrompt + "\n\n" +
+		m.styles.dim.Render("y/enter: yes · n/esc: no")
+	return m.styles.modal.Render(body)
 }
