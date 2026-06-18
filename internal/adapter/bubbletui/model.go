@@ -119,9 +119,6 @@ func (m *Model) Init() tea.Cmd { return nil }
 // Update is a stub until Task 4.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) { return m, nil }
 
-// View is a stub until Task 2.
-func (m *Model) View() string { return "" }
-
 // Run starts the Bubble Tea program in the alternate screen.
 func Run(svc *todo.Service) error {
 	p := tea.NewProgram(New(svc), tea.WithAltScreen())
