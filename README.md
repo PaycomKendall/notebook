@@ -16,7 +16,8 @@ or `~/.local/share/notebook`. Point `NB_DIR` at a git repo to version your notes
 ## CLI
 
     nb                       # show help (banner + commands)
-    nb tui                   # launch the interactive TUI
+    nb tui                   # launch the interactive TUI (tview by default)
+    nb tui --engine bubble   # launch the Bubble Tea TUI (or NB_TUI=bubble)
     nb add "buy milk" -l groceries -t store -n "2%"
     nb ls [-l list | -a] [-t tag] [--done|--open]
     nb done 3 [-l list]

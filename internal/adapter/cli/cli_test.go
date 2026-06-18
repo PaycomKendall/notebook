@@ -18,7 +18,7 @@ func newTestCmd(t *testing.T) (*todo.Service, func(args ...string) (string, erro
 	}
 	svc := todo.NewService(store)
 	run := func(args ...string) (string, error) {
-		cmd := NewRootCmd(svc, func() error { return nil })
+		cmd := NewRootCmd(svc, func(string) error { return nil })
 		var buf bytes.Buffer
 		cmd.SetOut(&buf)
 		cmd.SetErr(&buf)

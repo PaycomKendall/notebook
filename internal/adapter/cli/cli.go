@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/kendallowen/notebook/internal/todo"
@@ -28,9 +29,26 @@ const banner = `
 | | |   ||       |  |   |  |   |___ | |_|   ||       ||       ||    _  |
 |_|  |__||_______|  |___|  |_______||_______||_______||_______||___| |_|`
 
-// NewRootCmd builds the command tree. launchTUI runs the interactive UI,
-// reached only via `nb tui`; bare `nb` prints help.
-func NewRootCmd(svc *todo.Service, launchTUI func() error) *cobra.Command {
+// resolveEngine applies the engine rule: flag, then $NB_TUI, then "tview".
+func resolveEngine(flag string) (string, error) {
+	e := flag
+	if e == "" {
+		e = os.Getenv("NB_TUI")
+	}
+	if e == "" {
+		e = "tview"
+	}
+	switch e {
+	case "tview", "bubble":
+		return e, nil
+	default:
+		return "", fmt.Errorf("invalid engine %q (want \"tview\" or \"bubble\")", e)
+	}
+}
+
+// NewRootCmd builds the command tree. launchTUI runs the interactive UI for
+// the chosen engine; bare `nb` prints help.
+func NewRootCmd(svc *todo.Service, launchTUI func(engine string) error) *cobra.Command {
 	root := &cobra.Command{
 		Use:           "nb",
 		Short:         "notebook — a CLI + TUI task tracker",
@@ -41,11 +59,19 @@ func NewRootCmd(svc *todo.Service, launchTUI func() error) *cobra.Command {
 			return cmd.Help()
 		},
 	}
+	var engine string
 	tui := &cobra.Command{
 		Use:   "tui",
 		Short: "Launch the interactive TUI",
-		RunE:  func(cmd *cobra.Command, args []string) error { return launchTUI() },
+		RunE: func(cmd *cobra.Command, args []string) error {
+			eng, err := resolveEngine(engine)
+			if err != nil {
+				return err
+			}
+			return launchTUI(eng)
+		},
 	}
+	tui.Flags().StringVarP(&engine, "engine", "e", "", `TUI engine: "tview" (default) or "bubble"; or $NB_TUI`)
 	root.AddCommand(tui)
 	root.AddCommand(newAddCmd(svc))
 	root.AddCommand(newLsCmd(svc))

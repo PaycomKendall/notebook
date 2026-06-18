@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/kendallowen/notebook/internal/adapter/bubbletui"
 	"github.com/kendallowen/notebook/internal/adapter/cli"
 	"github.com/kendallowen/notebook/internal/adapter/jsonstore"
 	"github.com/kendallowen/notebook/internal/adapter/tui"
@@ -19,7 +20,10 @@ func main() {
 	}
 	svc := todo.NewService(store)
 
-	launchTUI := func() error {
+	launchTUI := func(engine string) error {
+		if engine == "bubble" {
+			return bubbletui.Run(svc)
+		}
 		return tui.New(svc).Run()
 	}
 
