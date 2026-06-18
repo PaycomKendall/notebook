@@ -20,7 +20,8 @@ func (s *Service) loadOrCreate(name string) (*List, error) {
 
 // AddTask adds a task to a list, creating the list if it does not exist.
 func (s *Service) AddTask(list, title string, tags []string, notes string) (Task, error) {
-	if err := ValidateListName(list); err != nil {
+	list, err := NormalizeListName(list)
+	if err != nil {
 		return Task{}, err
 	}
 	l, err := s.loadOrCreate(list)
@@ -43,5 +44,14 @@ func (s *Service) AddTask(list, title string, tags []string, notes string) (Task
 	return *t, nil
 }
 
-// GetList returns a list by name (ErrListNotFound if absent).
-func (s *Service) GetList(name string) (*List, error) { return s.repo.Load(name) }
+// GetList returns a list by canonical name (ErrListNotFound if absent).
+func (s *Service) GetList(name string) (*List, error) {
+	name, err := NormalizeListName(name)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.Load(name)
+}
+
+// ListNames returns the names of all stored lists.
+func (s *Service) ListNames() ([]string, error) { return s.repo.Names() }

@@ -92,3 +92,32 @@ func TestAddTaskRejectsBadListName(t *testing.T) {
 		t.Errorf("err = %v, want ErrInvalidName", err)
 	}
 }
+
+func TestAddTaskNormalizesListName(t *testing.T) {
+	svc := NewService(newFakeRepo())
+	if _, err := svc.AddTask("Work", "ship it", nil, ""); err != nil {
+		t.Fatalf("AddTask: %v", err)
+	}
+	l, err := svc.GetList("work") // mixed-case must resolve to canonical "work"
+	if err != nil {
+		t.Fatalf("GetList(work): %v", err)
+	}
+	if l.Name != "work" {
+		t.Errorf("stored List.Name = %q, want \"work\"", l.Name)
+	}
+	if len(l.Tasks) != 1 {
+		t.Fatalf("want 1 task in canonical list, got %d", len(l.Tasks))
+	}
+	// A different-case form must hit the SAME list, not create a new one.
+	if _, err := svc.AddTask("WORK", "second", nil, ""); err != nil {
+		t.Fatal(err)
+	}
+	l, _ = svc.GetList("work")
+	if len(l.Tasks) != 2 {
+		t.Errorf("WORK/Work/work must be one list; got %d tasks", len(l.Tasks))
+	}
+	names, _ := svc.ListNames()
+	if len(names) != 1 {
+		t.Errorf("expected exactly one underlying list, got %v", names)
+	}
+}

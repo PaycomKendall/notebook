@@ -24,11 +24,20 @@ func normalizeTag(tag string) string {
 	return strings.ToLower(strings.TrimSpace(tag))
 }
 
-// ValidateListName ensures a name is safe to use as a filename stem.
-func ValidateListName(name string) error {
+// NormalizeListName trims and lowercases a name, validates it, and returns the
+// canonical (storage) form. It is the single source of truth for list-name
+// validity; the Service normalizes every list-name argument through it so the
+// adapters only ever see canonical names.
+func NormalizeListName(name string) (string, error) {
 	n := strings.ToLower(strings.TrimSpace(name))
 	if n == "" || !listNameRe.MatchString(n) {
-		return ErrInvalidName
+		return "", ErrInvalidName
 	}
-	return nil
+	return n, nil
+}
+
+// ValidateListName reports whether a name is a valid list name.
+func ValidateListName(name string) error {
+	_, err := NormalizeListName(name)
+	return err
 }

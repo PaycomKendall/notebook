@@ -40,3 +40,16 @@ func TestAddRejectsEmptyTitle(t *testing.T) {
 		t.Errorf("blank title should not append; len = %d", len(l.Tasks))
 	}
 }
+
+func TestNormalizeListName(t *testing.T) {
+	got, err := NormalizeListName("  Work ")
+	if err != nil || got != "work" {
+		t.Errorf("NormalizeListName(' Work ') = %q,%v; want \"work\",nil", got, err)
+	}
+	if _, err := NormalizeListName("bad name"); err != ErrInvalidName {
+		t.Errorf("space name err = %v, want ErrInvalidName", err)
+	}
+	if _, err := NormalizeListName(""); err != ErrInvalidName {
+		t.Errorf("empty err = %v, want ErrInvalidName", err)
+	}
+}
