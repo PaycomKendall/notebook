@@ -4,20 +4,20 @@
 
 **Goal:** Build a Go task tracker with a full Cobra CLI and an interactive tview TUI over one shared, dependency-free domain core.
 
-**Architecture:** Hexagonal (ports & adapters). A core package `internal/todo` holds the domain (`Task`, `List`), a `ListRepository` port, and an application `Service`. Adapters: `jsonstore` (driven, JSON-file persistence), `cli` (driving, Cobra), `tui` (driving, tview). `cmd/todo/main.go` is the composition root that wires them.
+**Architecture:** Hexagonal (ports & adapters). A core package `internal/todo` holds the domain (`Task`, `List`), a `ListRepository` port, and an application `Service`. Adapters: `jsonstore` (driven, JSON-file persistence), `cli` (driving, Cobra), `tui` (driving, tview). `cmd/nb/main.go` is the composition root that wires them.
 
 **Tech Stack:** Go 1.22+, `github.com/spf13/cobra`, `github.com/rivo/tview`, `github.com/gdamore/tcell/v2`, stdlib `encoding/json`.
 
 ## Global Constraints
 
-- **Module path:** `github.com/kendallowen/todo`.
-- **Go version floor:** 1.22 (in `go.mod`).
-- **Dependency rule:** `internal/todo` imports no other project package and no `cobra`/`tview`/`tcell`. `jsonstore` imports only `internal/todo` + stdlib. `cli`/`tui` import `internal/todo` (+ their framework). Only `cmd/todo/main.go` imports adapters.
-- **Storage:** one pretty-printed JSON file per list at `<dir>/<name>.json`; dir resolved `TODO_DIR` → `$XDG_DATA_HOME/todo` → `~/.local/share/todo`. Writes are atomic (temp file + rename).
+- **Module path:** `github.com/kendallowen/notebook`.
+- **Go version floor:** originally 1.22; raised to **1.24** in `go.mod` once `tview`/`tcell` were added (their MVS minimum). No `toolchain` line. Accepted dependency-driven bump.
+- **Dependency rule:** `internal/todo` imports no other project package and no `cobra`/`tview`/`tcell`. `jsonstore` imports only `internal/todo` + stdlib. `cli`/`tui` import `internal/todo` (+ their framework). Only `cmd/nb/main.go` imports adapters.
+- **Storage:** one pretty-printed JSON file per list at `<dir>/<name>.json`; dir resolved `NB_DIR` → `$XDG_DATA_HOME/notebook` → `~/.local/share/notebook`. Writes are atomic (temp file + rename).
 - **Task fields:** `ID, Title, Done, Tags, Notes, Created, Updated`. No priority/due date.
 - **IDs:** per-list, monotonic via `List.NextID`, stable, never reused.
-- **List names:** lowercased, must match `^[a-z0-9._-]+$`.
-- **Default list (adapters only):** `-l` flag → `$TODO_LIST` → `inbox`.
+- **List names:** normalized to lowercase (trim + `strings.ToLower`) and must match `^[a-z0-9._-]+$`. `NormalizeListName(name) (string, error)` in the domain returns the canonical (lowercased) name; `ValidateListName` is a thin wrapper over it. The `Service` normalizes every list-name argument at its boundary before touching the repository, so adapters only ever receive canonical names (prevents `Work`/`work` divergence and case-insensitive-filesystem collisions).
+- **Default list (adapters only):** `-l` flag → `$NB_LIST` → `inbox`.
 - **TDD:** every code change is test-first. Commit after each task.
 - **Sentinel errors:** `ErrListNotFound`, `ErrListExists`, `ErrTaskNotFound`, `ErrEmptyTitle`, `ErrInvalidName`.
 
@@ -41,9 +41,9 @@
 
 Run:
 ```bash
-go mod init github.com/kendallowen/todo
+go mod init github.com/kendallowen/notebook
 ```
-Expected: creates `go.mod` with `module github.com/kendallowen/todo` and `go 1.22` (or newer).
+Expected: creates `go.mod` with `module github.com/kendallowen/notebook` and `go 1.22` (or newer).
 
 - [ ] **Step 2: Create the sentinel errors**
 
@@ -92,13 +92,22 @@ func normalizeTag(tag string) string {
 	return strings.ToLower(strings.TrimSpace(tag))
 }
 
-// ValidateListName ensures a name is safe to use as a filename stem.
-func ValidateListName(name string) error {
+// NormalizeListName trims and lowercases a name, validates it, and returns the
+// canonical (storage) form. It is the single source of truth for list-name
+// validity; the Service normalizes every list-name argument through it so the
+// adapters only ever see canonical names.
+func NormalizeListName(name string) (string, error) {
 	n := strings.ToLower(strings.TrimSpace(name))
 	if n == "" || !listNameRe.MatchString(n) {
-		return ErrInvalidName
+		return "", ErrInvalidName
 	}
-	return nil
+	return n, nil
+}
+
+// ValidateListName reports whether a name is a valid list name.
+func ValidateListName(name string) error {
+	_, err := NormalizeListName(name)
+	return err
 }
 ```
 
@@ -684,7 +693,8 @@ func (s *Service) loadOrCreate(name string) (*List, error) {
 
 // AddTask adds a task to a list, creating the list if it does not exist.
 func (s *Service) AddTask(list, title string, tags []string, notes string) (Task, error) {
-	if err := ValidateListName(list); err != nil {
+	list, err := NormalizeListName(list)
+	if err != nil {
 		return Task{}, err
 	}
 	l, err := s.loadOrCreate(list)
@@ -707,8 +717,14 @@ func (s *Service) AddTask(list, title string, tags []string, notes string) (Task
 	return *t, nil
 }
 
-// GetList returns a list by name (ErrListNotFound if absent).
-func (s *Service) GetList(name string) (*List, error) { return s.repo.Load(name) }
+// GetList returns a list by canonical name (ErrListNotFound if absent).
+func (s *Service) GetList(name string) (*List, error) {
+	name, err := NormalizeListName(name)
+	if err != nil {
+		return nil, err
+	}
+	return s.repo.Load(name)
+}
 ```
 
 - [ ] **Step 5: Run the test to verify it passes**
@@ -812,9 +828,13 @@ Expected: FAIL — methods undefined.
 
 Append to `internal/todo/service.go`:
 ```go
-// mutate loads an existing list, applies fn, and saves it.
+// mutate loads an existing list (by canonical name), applies fn, and saves it.
 func (s *Service) mutate(list string, fn func(*List) error) error {
-	l, err := s.repo.Load(list)
+	name, err := NormalizeListName(list)
+	if err != nil {
+		return err
+	}
+	l, err := s.repo.Load(name)
 	if err != nil {
 		return err
 	}
@@ -882,7 +902,7 @@ git commit -m "feat(core): Service task mutations on existing lists"
 - Test: `internal/todo/service_lists_test.go`
 
 **Interfaces:**
-- Produces: `func (s *Service) ListNames() ([]string, error)`; `CreateList(name string) error`; `DeleteList(name string) error`; `RenameList(old, new string) error`. (`GetList` already exists from Task 4.)
+- Produces: `CreateList(name string) error`; `DeleteList(name string) error`; `RenameList(old, new string) error`. (`GetList` and `ListNames` already exist from Task 4 / the normalization fix — do NOT redeclare them.)
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -933,25 +953,35 @@ Expected: FAIL — methods undefined.
 
 - [ ] **Step 3: Implement list management**
 
-Append to `internal/todo/service.go`:
+Append to `internal/todo/service.go` (`ListNames` already exists from the normalization fix — do not redeclare it):
 ```go
-func (s *Service) ListNames() ([]string, error) { return s.repo.Names() }
-
 func (s *Service) CreateList(name string) error {
-	if err := ValidateListName(name); err != nil {
+	name, err := NormalizeListName(name)
+	if err != nil {
 		return err
 	}
-	_, err := s.repo.Create(name)
+	_, err = s.repo.Create(name)
 	return err
 }
 
-func (s *Service) DeleteList(name string) error { return s.repo.Delete(name) }
-
-func (s *Service) RenameList(old, newName string) error {
-	if err := ValidateListName(newName); err != nil {
+func (s *Service) DeleteList(name string) error {
+	name, err := NormalizeListName(name)
+	if err != nil {
 		return err
 	}
-	return s.repo.Rename(old, newName)
+	return s.repo.Delete(name)
+}
+
+func (s *Service) RenameList(old, newName string) error {
+	oldName, err := NormalizeListName(old)
+	if err != nil {
+		return err
+	}
+	newName, err = NormalizeListName(newName)
+	if err != nil {
+		return err
+	}
+	return s.repo.Rename(oldName, newName)
 }
 ```
 
@@ -990,7 +1020,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 )
 
 func TestSaveLoadRoundTrip(t *testing.T) {
@@ -1034,14 +1064,14 @@ func TestSaveIsAtomicNoTempLeft(t *testing.T) {
 	}
 }
 
-func TestDefaultDirHonorsTODODIR(t *testing.T) {
-	t.Setenv("TODO_DIR", "/tmp/custom-todo")
+func TestDefaultDirHonorsNBDIR(t *testing.T) {
+	t.Setenv("NB_DIR", "/tmp/custom-nb")
 	d, err := DefaultDir()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if d != "/tmp/custom-todo" {
-		t.Errorf("DefaultDir = %q, want /tmp/custom-todo", d)
+	if d != "/tmp/custom-nb" {
+		t.Errorf("DefaultDir = %q, want /tmp/custom-nb", d)
 	}
 }
 
@@ -1080,7 +1110,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 )
 
 // Store persists lists as one JSON file per list.
@@ -1101,19 +1131,19 @@ func New(dir string) (*Store, error) {
 	return &Store{dir: dir}, nil
 }
 
-// DefaultDir resolves the data directory: TODO_DIR, then XDG, then ~/.local/share.
+// DefaultDir resolves the data directory: NB_DIR, then XDG, then ~/.local/share.
 func DefaultDir() (string, error) {
-	if d := os.Getenv("TODO_DIR"); d != "" {
+	if d := os.Getenv("NB_DIR"); d != "" {
 		return d, nil
 	}
 	if d := os.Getenv("XDG_DATA_HOME"); d != "" {
-		return filepath.Join(d, "todo"), nil
+		return filepath.Join(d, "notebook"), nil
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".local", "share", "todo"), nil
+	return filepath.Join(home, ".local", "share", "notebook"), nil
 }
 
 func (s *Store) path(name string) string { return filepath.Join(s.dir, name+".json") }
@@ -1219,7 +1249,7 @@ package jsonstore
 import (
 	"testing"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 )
 
 func TestNamesSortedAndCreate(t *testing.T) {
@@ -1382,8 +1412,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kendallowen/todo/internal/adapter/jsonstore"
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/adapter/jsonstore"
+	"github.com/kendallowen/notebook/internal/todo"
 )
 
 // newTestCmd builds a root command backed by a temp-dir store.
@@ -1439,16 +1469,16 @@ package cli
 import (
 	"os"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
-// resolveList applies the default-list rule: flag, then $TODO_LIST, then "inbox".
+// resolveList applies the default-list rule: flag, then $NB_LIST, then "inbox".
 func resolveList(flag string) string {
 	if flag != "" {
 		return flag
 	}
-	if env := os.Getenv("TODO_LIST"); env != "" {
+	if env := os.Getenv("NB_LIST"); env != "" {
 		return env
 	}
 	return "inbox"
@@ -1457,8 +1487,8 @@ func resolveList(flag string) string {
 // NewRootCmd builds the command tree. launchTUI runs the interactive UI.
 func NewRootCmd(svc *todo.Service, launchTUI func() error) *cobra.Command {
 	root := &cobra.Command{
-		Use:           "todo",
-		Short:         "A CLI + TUI task tracker",
+		Use:           "nb",
+		Short:         "notebook — a CLI + TUI task tracker",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -1484,7 +1514,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -1506,7 +1536,7 @@ func newAddCmd(svc *todo.Service) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $TODO_LIST)")
+	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $NB_LIST)")
 	cmd.Flags().StringSliceVarP(&tags, "tag", "t", nil, "tag (repeatable or comma-separated)")
 	cmd.Flags().StringVarP(&note, "note", "n", "", "note text")
 	return cmd
@@ -1614,7 +1644,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -1686,7 +1716,7 @@ func newLsCmd(svc *todo.Service) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $TODO_LIST)")
+	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $NB_LIST)")
 	cmd.Flags().BoolVarP(&all, "all", "a", false, "show all lists")
 	cmd.Flags().StringVarP(&tag, "tag", "t", "", "filter by tag")
 	cmd.Flags().BoolVar(&doneOnly, "done", false, "show only done tasks")
@@ -1714,7 +1744,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -1742,7 +1772,7 @@ func doneLikeCmd(svc *todo.Service, use string, done bool) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $TODO_LIST)")
+	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $NB_LIST)")
 	return cmd
 }
 ```
@@ -1756,7 +1786,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -1781,7 +1811,7 @@ func newRmCmd(svc *todo.Service) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $TODO_LIST)")
+	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $NB_LIST)")
 	return cmd
 }
 ```
@@ -1875,7 +1905,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -1904,7 +1934,7 @@ func newEditCmd(svc *todo.Service) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $TODO_LIST)")
+	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $NB_LIST)")
 	cmd.Flags().StringVar(&title, "title", "", "new title")
 	cmd.Flags().StringVarP(&note, "note", "n", "", "new note")
 	return cmd
@@ -1920,7 +1950,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -1951,7 +1981,7 @@ func newTagCmd(svc *todo.Service) *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $TODO_LIST)")
+	cmd.Flags().StringVarP(&list, "list", "l", "", "list name (default: inbox or $NB_LIST)")
 	cmd.Flags().StringSliceVar(&add, "add", nil, "tag to add (repeatable)")
 	cmd.Flags().StringSliceVar(&rm, "rm", nil, "tag to remove (repeatable)")
 	return cmd
@@ -2053,7 +2083,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
 )
 
@@ -2159,7 +2189,7 @@ git commit -m "feat(cli): lists command group (new/rm/rename + counts)"
 ### Task 13: Composition root (runnable CLI)
 
 **Files:**
-- Create: `cmd/todo/main.go`
+- Create: `cmd/nb/main.go`
 
 **Interfaces:**
 - Consumes: `jsonstore.New`, `todo.NewService`, `cli.NewRootCmd`.
@@ -2167,7 +2197,7 @@ git commit -m "feat(cli): lists command group (new/rm/rename + counts)"
 
 - [ ] **Step 1: Write `main.go`**
 
-`cmd/todo/main.go`:
+`cmd/nb/main.go`:
 ```go
 package main
 
@@ -2175,13 +2205,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kendallowen/todo/internal/adapter/cli"
-	"github.com/kendallowen/todo/internal/adapter/jsonstore"
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/adapter/cli"
+	"github.com/kendallowen/notebook/internal/adapter/jsonstore"
+	"github.com/kendallowen/notebook/internal/todo"
 )
 
 func main() {
-	dir := os.Getenv("TODO_DIR")
+	dir := os.Getenv("NB_DIR")
 	store, err := jsonstore.New(dir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
@@ -2191,7 +2221,7 @@ func main() {
 
 	// Placeholder until the TUI adapter lands in Task 16.
 	launchTUI := func() error {
-		fmt.Fprintln(os.Stderr, "TUI not yet implemented — use subcommands (todo --help)")
+		fmt.Fprintln(os.Stderr, "TUI not yet implemented — use subcommands (nb --help)")
 		return nil
 	}
 
@@ -2208,8 +2238,8 @@ func main() {
 Run:
 ```bash
 go build ./...
-TODO_DIR="$(mktemp -d)" go run ./cmd/todo add "first task" -l demo
-TODO_DIR=/tmp/does-not-persist go run ./cmd/todo --help
+NB_DIR="$(mktemp -d)" go run ./cmd/nb add "first task" -l demo
+NB_DIR=/tmp/does-not-persist go run ./cmd/nb --help
 ```
 Expected: build succeeds; the `add` prints `Added [demo] #1: first task`; `--help` lists `add`, `ls`, `done`, `undone`, `rm`, `edit`, `tag`, `lists`, `tui`.
 
@@ -2221,7 +2251,7 @@ Expected: PASS, no vet complaints.
 - [ ] **Step 4: Commit**
 
 ```bash
-git add cmd/todo/main.go
+git add cmd/nb/main.go
 git commit -m "feat(cmd): composition root wiring CLI (TUI placeholder)"
 ```
 
@@ -2256,8 +2286,8 @@ import (
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/kendallowen/todo/internal/adapter/jsonstore"
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/adapter/jsonstore"
+	"github.com/kendallowen/notebook/internal/todo"
 )
 
 func newTestApp(t *testing.T) (*App, *todo.Service) {
@@ -2350,7 +2380,7 @@ import (
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/kendallowen/todo/internal/todo"
+	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/rivo/tview"
 )
 
@@ -2528,7 +2558,6 @@ import (
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
-	"github.com/kendallowen/todo/internal/todo"
 )
 
 func TestToggleKeyMarksTaskDone(t *testing.T) {
@@ -2864,7 +2893,7 @@ git commit -m "feat(tui): key bindings, focus cycling, add/edit/delete modals"
 ### Task 16: Wire TUI into main + README + verification
 
 **Files:**
-- Modify: `cmd/todo/main.go` (replace the TUI placeholder)
+- Modify: `cmd/nb/main.go` (replace the TUI placeholder)
 - Create: `README.md`
 
 **Interfaces:**
@@ -2872,7 +2901,7 @@ git commit -m "feat(tui): key bindings, focus cycling, add/edit/delete modals"
 
 - [ ] **Step 1: Replace the TUI placeholder in `main.go`**
 
-In `cmd/todo/main.go`, add the import `"github.com/kendallowen/todo/internal/adapter/tui"` and replace the `launchTUI` placeholder with:
+In `cmd/nb/main.go`, add the import `"github.com/kendallowen/notebook/internal/adapter/tui"` and replace the `launchTUI` placeholder with:
 ```go
 	launchTUI := func() error {
 		return tui.New(svc).Run()
@@ -2893,7 +2922,7 @@ Expected: all PASS, no vet output.
 
 `README.md`:
 ```markdown
-# todo
+# notebook (`nb`)
 
 A task tracker with a full CLI and an interactive three-pane TUI, built in Go
 using a hexagonal (ports & adapters) architecture.
@@ -2901,30 +2930,30 @@ using a hexagonal (ports & adapters) architecture.
 ## Install
 
     brew install go            # if not already installed
-    go install ./cmd/todo      # puts `todo` on ~/go/bin (ensure it's on PATH)
+    go install ./cmd/nb        # puts `nb` on ~/go/bin (ensure it's on PATH)
 
 ## Storage
 
-One JSON file per list under (in order): `$TODO_DIR`, `$XDG_DATA_HOME/todo`,
-or `~/.local/share/todo`. Point `TODO_DIR` at a git repo to version your todos.
+One JSON file per list under (in order): `$NB_DIR`, `$XDG_DATA_HOME/notebook`,
+or `~/.local/share/notebook`. Point `NB_DIR` at a git repo to version your notes.
 
 ## CLI
 
-    todo                       # launch the TUI
-    todo tui                   # launch the TUI explicitly
-    todo add "buy milk" -l groceries -t store -n "2%"
-    todo ls [-l list | -a] [-t tag] [--done|--open]
-    todo done 3 [-l list]
-    todo undone 3 [-l list]
-    todo rm 3 [-l list]
-    todo edit 3 --title "new" -n "note" [-l list]
-    todo tag 3 --add urgent --rm home [-l list]
-    todo lists
-    todo lists new ideas
-    todo lists rename ideas later
-    todo lists rm later --force
+    nb                       # launch the TUI
+    nb tui                   # launch the TUI explicitly
+    nb add "buy milk" -l groceries -t store -n "2%"
+    nb ls [-l list | -a] [-t tag] [--done|--open]
+    nb done 3 [-l list]
+    nb undone 3 [-l list]
+    nb rm 3 [-l list]
+    nb edit 3 --title "new" -n "note" [-l list]
+    nb tag 3 --add urgent --rm home [-l list]
+    nb lists
+    nb lists new ideas
+    nb lists rename ideas later
+    nb lists rm later --force
 
-Default list is `inbox`; override with `-l` or `$TODO_LIST`.
+Default list is `inbox`; override with `-l` or `$NB_LIST`.
 
 ## TUI keys
 
@@ -2942,16 +2971,16 @@ Lists: `a` new, `r` rename, `x` delete. `q`/`Ctrl-C` quit.
 
 Run:
 ```bash
-go install ./cmd/todo
-TODO_DIR="$(mktemp -d)" todo add "try the TUI" -l demo
-TODO_DIR="$(mktemp -d)" todo            # launches TUI; press a, d, q to verify
+go install ./cmd/nb
+NB_DIR="$(mktemp -d)" nb add "try the TUI" -l demo
+NB_DIR="$(mktemp -d)" nb            # launches TUI; press a, d, q to verify
 ```
 Expected: `add` persists and prints; bare `todo` opens the three-pane TUI; adding/toggling/quitting works.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cmd/todo/main.go README.md
+git add cmd/nb/main.go README.md
 git commit -m "feat(cmd): wire TUI into root command; add README"
 ```
 

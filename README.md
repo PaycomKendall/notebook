@@ -1,0 +1,43 @@
+# notebook (`nb`)
+
+A task tracker with a full CLI and an interactive three-pane TUI, built in Go
+using a hexagonal (ports & adapters) architecture.
+
+## Install
+
+    brew install go            # if not already installed
+    go install ./cmd/nb        # puts `nb` on ~/go/bin (ensure it's on PATH)
+
+## Storage
+
+One JSON file per list under (in order): `$NB_DIR`, `$XDG_DATA_HOME/notebook`,
+or `~/.local/share/notebook`. Point `NB_DIR` at a git repo to version your notes.
+
+## CLI
+
+    nb                       # launch the TUI
+    nb tui                   # launch the TUI explicitly
+    nb add "buy milk" -l groceries -t store -n "2%"
+    nb ls [-l list | -a] [-t tag] [--done|--open]
+    nb done 3 [-l list]
+    nb undone 3 [-l list]
+    nb rm 3 [-l list]
+    nb edit 3 --title "new" -n "note" [-l list]
+    nb tag 3 --add urgent --rm home [-l list]
+    nb lists
+    nb lists new ideas
+    nb lists rename ideas later
+    nb lists rm later --force
+
+Default list is `inbox`; override with `-l` or `$NB_LIST`.
+
+## TUI keys
+
+Panes: Lists | Tasks | Detail. `Tab`/`Shift-Tab` switch panes.
+Tasks: `a` add, `d` toggle done, `e`/`n` edit, `x` delete.
+Lists: `a` new, `r` rename, `x` delete. `q`/`Ctrl-C` quit.
+
+## Development
+
+    go test ./...
+    go vet ./...
