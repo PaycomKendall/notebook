@@ -82,6 +82,19 @@ func TestConfirmDeletesTask(t *testing.T) {
 	}
 }
 
+func TestValidationClearsStaleStatus(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.status = "old error"
+	m.openAddTask()
+	m.updateForm(key("enter")) // empty title -> validation early return
+	if m.status != "" {
+		t.Errorf("stale status should be cleared on submit; got %q", m.status)
+	}
+	if m.mode != modeAddTask {
+		t.Errorf("form should stay open on empty title; mode=%v", m.mode)
+	}
+}
+
 func TestFormViewShowsFieldsAndHint(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
 	m.openAddTask()

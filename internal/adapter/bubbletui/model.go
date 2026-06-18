@@ -52,7 +52,7 @@ type Model struct {
 
 // New builds a Model and loads the initial lists + tasks.
 func New(svc *todo.Service) *Model {
-	m := &Model{svc: svc, width: 90, height: 24}
+	m := &Model{svc: svc, width: 90, height: 24, focus: focusTasks}
 	m.reloadLists()
 	m.reloadTasks()
 	return m

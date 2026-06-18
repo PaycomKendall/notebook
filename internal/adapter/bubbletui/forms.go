@@ -85,6 +85,7 @@ func (m *Model) openRenameList() {
 
 // submitForm performs the Service call for the active form mode.
 func (m *Model) submitForm() {
+	m.status = ""
 	switch m.mode {
 	case modeAddTask:
 		title := strings.TrimSpace(m.inputs[0].Value())

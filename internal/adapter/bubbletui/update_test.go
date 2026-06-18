@@ -14,17 +14,24 @@ func send(m *Model, k tea.KeyMsg) tea.Cmd {
 
 func TestTabCyclesFocus(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) { _, _ = s.AddTask("work", "alpha", nil, "") })
-	if m.focus != focusLists {
-		t.Fatalf("initial focus = %v, want lists", m.focus)
-	}
-	send(m, key("tab"))
 	if m.focus != focusTasks {
-		t.Errorf("after tab focus = %v, want tasks", m.focus)
+		t.Fatalf("initial focus = %v, want tasks", m.focus)
 	}
-	send(m, key("tab"))
-	send(m, key("tab")) // wraps detail -> lists
-	if m.focus != focusLists {
-		t.Errorf("focus after wrap = %v, want lists", m.focus)
+	send(m, key("tab")) // tasks -> detail
+	if m.focus != focusDetail {
+		t.Errorf("after tab focus = %v, want detail", m.focus)
+	}
+	send(m, key("tab")) // detail -> lists
+	send(m, key("tab")) // lists -> tasks (wrap)
+	if m.focus != focusTasks {
+		t.Errorf("focus after wrap = %v, want tasks", m.focus)
+	}
+}
+
+func TestInitialFocusIsTasksPane(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _, _ = s.AddTask("work", "alpha", nil, "") })
+	if m.focus != focusTasks {
+		t.Errorf("initial focus = %v, want tasks", m.focus)
 	}
 }
 
