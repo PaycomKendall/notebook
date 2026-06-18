@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/kendallowen/notebook/internal/todo"
@@ -112,4 +114,66 @@ func (s *Store) Load(name string) (*todo.List, error) {
 		return nil, fmt.Errorf("parse list %q: %w", name, err)
 	}
 	return fromDTO(d), nil
+}
+
+// Names returns the stems of all *.json list files, sorted.
+func (s *Store) Names() ([]string, error) {
+	entries, err := os.ReadDir(s.dir)
+	if err != nil {
+		return nil, err
+	}
+	var names []string
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		if strings.HasSuffix(e.Name(), ".json") {
+			names = append(names, strings.TrimSuffix(e.Name(), ".json"))
+		}
+	}
+	sort.Strings(names)
+	return names, nil
+}
+
+// Create makes a new empty list, erroring if it already exists.
+func (s *Store) Create(name string) (*todo.List, error) {
+	if err := todo.ValidateListName(name); err != nil {
+		return nil, err
+	}
+	if _, err := os.Stat(s.path(name)); err == nil {
+		return nil, todo.ErrListExists
+	}
+	l := &todo.List{Name: name, NextID: 1}
+	if err := s.Save(l); err != nil {
+		return nil, err
+	}
+	return l, nil
+}
+
+// Delete removes a list file.
+func (s *Store) Delete(name string) error {
+	err := os.Remove(s.path(name))
+	if errors.Is(err, os.ErrNotExist) {
+		return todo.ErrListNotFound
+	}
+	return err
+}
+
+// Rename moves a list to a new name (and updates its stored Name).
+func (s *Store) Rename(oldName, newName string) error {
+	if err := todo.ValidateListName(newName); err != nil {
+		return err
+	}
+	if _, err := os.Stat(s.path(newName)); err == nil {
+		return todo.ErrListExists
+	}
+	l, err := s.Load(oldName)
+	if err != nil {
+		return err
+	}
+	l.Name = newName
+	if err := s.Save(l); err != nil {
+		return err
+	}
+	return s.Delete(oldName)
 }
