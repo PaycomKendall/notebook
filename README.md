@@ -26,6 +26,7 @@ or `~/.local/share/notebook`. Point `NB_DIR` at a git repo to version your notes
     nb rm 3 [-l list]
     nb edit 3 --title "new" -n "note" [-l list]
     nb tag 3 --add urgent --rm home [-l list]
+    nb mv 3 archive [-l work]   # move task #3 to "archive" (alias: move; dest auto-created)
     nb lists
     nb lists new ideas
     nb lists rename ideas later
@@ -39,7 +40,7 @@ A hint bar at the bottom shows the keys for the focused pane. The TUI opens
 focused on the Tasks pane.
 
 Panes: Lists | Tasks | Detail. `Tab`/`Shift-Tab` switch panes; `↑`/`↓` or `j`/`k` move within a pane.
-Tasks: `a` add, `d` toggle done, `e`/`n` edit, `x` delete.
+Tasks: `a` add, `d` toggle done, `e`/`n` edit, `m` move to another list, `x` delete.
 Lists: `a` new, `r` rename, `x` delete. `q`/`Ctrl-C` quit.
 In forms/dialogs: `Tab`/`↑`/`↓` move between fields, `Enter` activates a button, `Esc` cancels.
 
