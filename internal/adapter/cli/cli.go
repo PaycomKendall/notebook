@@ -36,5 +36,9 @@ func NewRootCmd(svc *todo.Service, launchTUI func() error) *cobra.Command {
 	}
 	root.AddCommand(tui)
 	root.AddCommand(newAddCmd(svc))
+	root.AddCommand(newLsCmd(svc))
+	root.AddCommand(newDoneCmd(svc))
+	root.AddCommand(newUndoneCmd(svc))
+	root.AddCommand(newRmCmd(svc))
 	return root
 }
