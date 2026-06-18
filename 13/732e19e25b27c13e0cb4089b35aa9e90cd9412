@@ -1,0 +1,21 @@
+internal/todo/service_mutate_test.go
+  s_cee99dc4d9ea23::t_b14222831c3cb1 1-63
+internal/todo/service.go
+  s_cee99dc4d9ea23::t_9b5d5bad6a3267 58-109
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "13732e19e25b27c13e0cb4089b35aa9e90cd9412",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
