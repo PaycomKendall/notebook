@@ -33,7 +33,10 @@ Default list is `inbox`; override with `-l` or `$NB_LIST`.
 
 ## TUI keys
 
-Panes: Lists | Tasks | Detail. `Tab`/`Shift-Tab` switch panes.
+A hint bar at the bottom shows the keys for the focused pane. The TUI opens
+focused on the Tasks pane.
+
+Panes: Lists | Tasks | Detail. `Tab`/`Shift-Tab` switch panes; `↑`/`↓` or `j`/`k` move within a pane.
 Tasks: `a` add, `d` toggle done, `e`/`n` edit, `x` delete.
 Lists: `a` new, `r` rename, `x` delete. `q`/`Ctrl-C` quit.
 
