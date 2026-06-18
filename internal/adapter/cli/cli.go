@@ -40,5 +40,7 @@ func NewRootCmd(svc *todo.Service, launchTUI func() error) *cobra.Command {
 	root.AddCommand(newDoneCmd(svc))
 	root.AddCommand(newUndoneCmd(svc))
 	root.AddCommand(newRmCmd(svc))
+	root.AddCommand(newEditCmd(svc))
+	root.AddCommand(newTagCmd(svc))
 	return root
 }
