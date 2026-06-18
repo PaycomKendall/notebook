@@ -1,0 +1,21 @@
+internal/todo/list.go
+  s_cee99dc4d9ea23::t_4e7b201c75e38e 40-80
+internal/todo/list_methods_test.go
+  s_cee99dc4d9ea23::t_b2764f2dced523 1-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "8c988c2894877fe3f6d78431547eb417875189c8",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
