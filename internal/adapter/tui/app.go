@@ -185,6 +185,19 @@ func (a *App) focus(i int) {
 	a.updateFooter()
 }
 
+// paneFocused reports whether one of the three main panes currently holds
+// focus. It is false while a form or modal is open, so the global key
+// shortcuts step aside and let the form handle its own input.
+func (a *App) paneFocused() bool {
+	focused := a.app.GetFocus()
+	for _, p := range a.panes {
+		if p == focused {
+			return true
+		}
+	}
+	return false
+}
+
 // cycleFocus moves focus by delta with wraparound.
 func (a *App) cycleFocus(delta int) {
 	n := 3
@@ -226,6 +239,12 @@ func (a *App) deleteSelected() {
 func (a *App) bindKeys() {
 	a.panes = []tview.Primitive{a.lists, a.tasks, a.detail}
 	a.app.SetInputCapture(func(ev *tcell.EventKey) *tcell.EventKey {
+		// When a form or modal is open it owns all input — let every key
+		// through (Tab moves between fields, letters type literally). The
+		// global shortcuts only apply while one of the three panes is focused.
+		if !a.paneFocused() {
+			return ev
+		}
 		switch ev.Key() {
 		case tcell.KeyTab:
 			a.cycleFocus(1)
