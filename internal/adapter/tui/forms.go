@@ -4,14 +4,34 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-// confirm shows a yes/no modal, running onYes if confirmed.
+// formHint is the keybinding hint shown in the footer of every input form.
+const formHint = " Tab/↑↓: move  ·  Enter: select  ·  Esc: cancel"
+
+// showModalForm displays a bordered form with a hint footer, wiring Esc to
+// cancel (restore the main view). All input forms go through this helper.
+func (a *App) showModalForm(form *tview.Form, title string) {
+	form.SetBorder(true).SetTitle(title)
+	form.SetCancelFunc(func() { a.rebuildRoot() })
+	hint := tview.NewTextView().SetText(formHint)
+	layout := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(form, 0, 1, true).
+		AddItem(hint, 1, 0, false)
+	a.app.SetRoot(layout, true)
+}
+
+// confirm shows a yes/no modal, running onYes if confirmed. Esc cancels.
 func (a *App) confirm(prompt string, onYes func()) {
 	prev := a.app.GetFocus()
+	cancel := func() {
+		a.rebuildRoot()
+		a.app.SetFocus(prev)
+	}
 	modal := tview.NewModal().
-		SetText(prompt).
+		SetText(prompt + "\n\nEnter: select  ·  Esc: cancel").
 		AddButtons([]string{"Yes", "No"}).
 		SetDoneFunc(func(_ int, label string) {
 			a.rebuildRoot()
@@ -20,6 +40,13 @@ func (a *App) confirm(prompt string, onYes func()) {
 			}
 			a.app.SetFocus(prev)
 		})
+	modal.SetInputCapture(func(ev *tcell.EventKey) *tcell.EventKey {
+		if ev.Key() == tcell.KeyEscape {
+			cancel()
+			return nil
+		}
+		return ev
+	})
 	a.app.SetRoot(modal, true)
 }
 
@@ -56,8 +83,7 @@ func (a *App) addTaskForm() {
 		a.refreshDetail()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	form.SetBorder(true).SetTitle(" Add task ")
-	a.app.SetRoot(form, true)
+	a.showModalForm(form, " Add task ")
 }
 
 // editTaskForm edits the selected task's title and notes.
@@ -79,8 +105,7 @@ func (a *App) editTaskForm() {
 		a.refreshDetail()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	form.SetBorder(true).SetTitle(" Edit task ")
-	a.app.SetRoot(form, true)
+	a.showModalForm(form, " Edit task ")
 }
 
 // newListForm creates a new list.
@@ -96,8 +121,7 @@ func (a *App) newListForm() {
 		a.refreshLists()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	form.SetBorder(true).SetTitle(" New list ")
-	a.app.SetRoot(form, true)
+	a.showModalForm(form, " New list ")
 }
 
 // deleteSelectedList removes the highlighted list after confirmation.
@@ -133,6 +157,5 @@ func (a *App) renameListForm() {
 		a.refreshDetail()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	form.SetBorder(true).SetTitle(" Rename list ")
-	a.app.SetRoot(form, true)
+	a.showModalForm(form, " Rename list ")
 }

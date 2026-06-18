@@ -39,6 +39,7 @@ focused on the Tasks pane.
 Panes: Lists | Tasks | Detail. `Tab`/`Shift-Tab` switch panes; `↑`/`↓` or `j`/`k` move within a pane.
 Tasks: `a` add, `d` toggle done, `e`/`n` edit, `x` delete.
 Lists: `a` new, `r` rename, `x` delete. `q`/`Ctrl-C` quit.
+In forms/dialogs: `Tab`/`↑`/`↓` move between fields, `Enter` activates a button, `Esc` cancels.
 
 ## Development
 
