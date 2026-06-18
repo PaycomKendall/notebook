@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -54,7 +55,7 @@ func newLsCmd(svc *todo.Service) *cobra.Command {
 			out := cmd.OutOrStdout()
 			for _, name := range names {
 				l, err := svc.GetList(name)
-				if err == todo.ErrListNotFound {
+				if errors.Is(err, todo.ErrListNotFound) || errors.Is(err, todo.ErrInvalidName) {
 					continue
 				}
 				if err != nil {

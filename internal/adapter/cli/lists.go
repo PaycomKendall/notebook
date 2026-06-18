@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/kendallowen/notebook/internal/todo"
@@ -19,6 +20,9 @@ func newListsCmd(svc *todo.Service) *cobra.Command {
 			out := cmd.OutOrStdout()
 			for _, name := range names {
 				l, err := svc.GetList(name)
+				if errors.Is(err, todo.ErrListNotFound) || errors.Is(err, todo.ErrInvalidName) {
+					continue
+				}
 				if err != nil {
 					return err
 				}
