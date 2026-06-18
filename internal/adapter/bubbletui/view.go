@@ -10,7 +10,7 @@ import (
 // View renders the current mode.
 func (m *Model) View() string {
 	switch m.mode {
-	case modeAddTask, modeEditTask, modeNewList, modeRenameList:
+	case modeAddTask, modeEditTask, modeNewList, modeRenameList, modeMoveTask:
 		return m.formView()
 	case modeConfirm:
 		return m.confirmView()
@@ -130,7 +130,7 @@ func (m *Model) footer() string {
 	case focusLists:
 		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "new"}, {"r", "rename"}, {"x", "delete"}, {"q", "quit"}})
 	case focusTasks:
-		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "add"}, {"d", "done"}, {"e", "edit"}, {"x", "delete"}, {"q", "quit"}})
+		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "add"}, {"d", "done"}, {"e", "edit"}, {"m", "→list"}, {"x", "delete"}, {"q", "quit"}})
 	default:
 		return m.hint([][2]string{{"tab", "pane"}, {"q", "quit"}})
 	}

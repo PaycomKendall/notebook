@@ -88,6 +88,7 @@ func NewRootCmd(svc *todo.Service, launchTUI func(engine, theme string) error) *
 	root.AddCommand(newRmCmd(svc))
 	root.AddCommand(newEditCmd(svc))
 	root.AddCommand(newTagCmd(svc))
+	root.AddCommand(newMvCmd(svc))
 	root.AddCommand(newListsCmd(svc))
 	return root
 }

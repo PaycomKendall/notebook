@@ -22,6 +22,7 @@ const (
 	modeEditTask
 	modeNewList
 	modeRenameList
+	modeMoveTask
 	modeConfirm
 )
 

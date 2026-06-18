@@ -28,6 +28,23 @@ func (l *List) Add(title string) (*Task, error) {
 	return &l.Tasks[len(l.Tasks)-1], nil
 }
 
+// Append adds an existing task, assigning it a fresh ID from this list's NextID
+// and bumping Updated, while preserving its other fields. Tags are cloned so the
+// source task is not aliased.
+func (l *List) Append(t Task) *Task {
+	if l.NextID == 0 {
+		l.NextID = 1
+	}
+	t.ID = l.NextID
+	l.NextID++
+	t.Updated = time.Now()
+	if t.Tags != nil {
+		t.Tags = append([]string(nil), t.Tags...)
+	}
+	l.Tasks = append(l.Tasks, t)
+	return &l.Tasks[len(l.Tasks)-1]
+}
+
 // index returns the slice position of id, or -1 if absent.
 func (l *List) index(id int) int {
 	for i := range l.Tasks {

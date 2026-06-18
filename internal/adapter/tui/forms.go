@@ -159,3 +159,26 @@ func (a *App) renameListForm() {
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
 	a.showModalForm(form, " Rename list ")
 }
+
+// moveTaskForm moves the selected task to another list (auto-created if new).
+func (a *App) moveTaskForm() {
+	t := a.selectedTask()
+	if t == nil || a.current == nil {
+		return
+	}
+	src, id := a.current.Name, t.ID
+	var dest string
+	form := tview.NewForm().
+		AddInputField("Move to list", "", 30, nil, func(s string) { dest = s })
+	form.AddButton("Move", func() {
+		if strings.TrimSpace(dest) != "" {
+			_, _ = a.svc.MoveTask(src, id, dest)
+		}
+		a.rebuildRoot()
+		a.refreshLists()
+		a.refreshTasks()
+		a.refreshDetail()
+	})
+	form.AddButton("Cancel", func() { a.rebuildRoot() })
+	a.showModalForm(form, " Move task ")
+}

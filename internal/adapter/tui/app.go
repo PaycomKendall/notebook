@@ -71,7 +71,7 @@ func footerHint(focusIdx int) string {
 	case 0: // Lists
 		return " Tab: pane  ↑↓/jk: move  a: new list  r: rename  x: delete  q: quit"
 	case 1: // Tasks
-		return " Tab: pane  ↑↓/jk: move  a: add  d: done  e: edit  x: delete  q: quit"
+		return " Tab: pane  ↑↓/jk: move  a: add  d: done  e: edit  m: →list  x: delete  q: quit"
 	default: // Detail
 		return " Tab: pane  ↑↓: scroll  q: quit"
 	}
@@ -292,6 +292,11 @@ func (a *App) bindKeys() {
 		case 'n':
 			if a.focusIdx == 1 {
 				a.editTaskForm()
+			}
+			return nil
+		case 'm':
+			if a.focusIdx == 1 {
+				a.moveTaskForm()
 			}
 			return nil
 		}
