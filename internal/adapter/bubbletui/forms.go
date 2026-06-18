@@ -83,6 +83,19 @@ func (m *Model) openRenameList() {
 	m.refocusInputs()
 }
 
+func (m *Model) openMoveTask() {
+	t := m.selectedTask()
+	if t == nil || m.current == nil {
+		return
+	}
+	m.formList = m.current.Name
+	m.formTaskID = t.ID
+	m.mode = modeMoveTask
+	m.inputs = []textinput.Model{newInput("Move to list", "")}
+	m.formField = 0
+	m.refocusInputs()
+}
+
 // submitForm performs the Service call for the active form mode.
 func (m *Model) submitForm() {
 	m.status = ""
@@ -128,6 +141,17 @@ func (m *Model) submitForm() {
 			return
 		}
 		if err := m.svc.RenameList(m.formOldName, name); err != nil {
+			m.status = err.Error()
+		}
+		m.closeForm()
+		m.reloadLists()
+		m.reloadTasks()
+	case modeMoveTask:
+		dest := strings.TrimSpace(m.inputs[0].Value())
+		if dest == "" {
+			return
+		}
+		if _, err := m.svc.MoveTask(m.formList, m.formTaskID, dest); err != nil {
 			m.status = err.Error()
 		}
 		m.closeForm()
@@ -210,6 +234,8 @@ func (m *Model) formTitle() string {
 		return "New list"
 	case modeRenameList:
 		return "Rename list"
+	case modeMoveTask:
+		return "Move task"
 	}
 	return ""
 }

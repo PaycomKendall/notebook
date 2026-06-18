@@ -96,6 +96,11 @@ func (m *Model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			m.openEditTask()
 			return m, textinput.Blink
 		}
+	case "m":
+		if m.focus == focusTasks {
+			m.openMoveTask()
+			return m, textinput.Blink
+		}
 	case "r":
 		if m.focus == focusLists {
 			m.openRenameList()
