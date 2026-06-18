@@ -118,9 +118,13 @@ func (m *Model) selectedTask() *todo.Task {
 // Init satisfies tea.Model; Bubble Tea sends the initial WindowSizeMsg.
 func (m *Model) Init() tea.Cmd { return nil }
 
-// Run starts the Bubble Tea program in the alternate screen.
-func Run(svc *todo.Service) error {
-	p := tea.NewProgram(New(svc, themeDefault), tea.WithAltScreen())
-	_, err := p.Run()
+// Run resolves the theme name and starts the Bubble Tea program (alt screen).
+func Run(svc *todo.Service, themeName string) error {
+	theme, err := resolveTheme(themeName)
+	if err != nil {
+		return err
+	}
+	p := tea.NewProgram(New(svc, theme), tea.WithAltScreen())
+	_, err = p.Run()
 	return err
 }

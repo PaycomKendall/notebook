@@ -17,7 +17,7 @@ func runEngine(t *testing.T, env string, args ...string) (engine string, err err
 	}
 	svc := todo.NewService(store)
 	got := ""
-	cmd := NewRootCmd(svc, func(eng string) error { got = eng; return nil })
+	cmd := NewRootCmd(svc, func(eng, _ string) error { got = eng; return nil })
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
 	cmd.SetErr(&buf)
