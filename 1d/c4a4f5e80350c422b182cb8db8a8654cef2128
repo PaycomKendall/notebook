@@ -1,0 +1,21 @@
+docs/superpowers/specs/2026-06-18-bubbletea-tui-adapter-design.md
+  s_cee99dc4d9ea23::t_20c9e556d3e500 1-118,125-134,139-191
+  s_cee99dc4d9ea23::t_ca505f567a67b5 119-124
+  s_cee99dc4d9ea23::t_a56aed7f1cd2ba 135-138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "1dc4a4f5e80350c422b182cb8db8a8654cef2128",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
