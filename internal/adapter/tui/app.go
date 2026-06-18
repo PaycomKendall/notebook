@@ -17,6 +17,7 @@ type App struct {
 	lists  *tview.List
 	tasks  *tview.List
 	detail *tview.TextView
+	footer *tview.TextView
 
 	listNames []string
 	current   *todo.List // currently displayed list
@@ -41,6 +42,8 @@ func (a *App) buildUI() {
 	a.detail = tview.NewTextView().SetDynamicColors(true)
 	a.detail.SetBorder(true).SetTitle(" Detail ")
 
+	a.footer = tview.NewTextView().SetDynamicColors(true)
+
 	a.lists.SetChangedFunc(func(int, string, string, rune) {
 		a.refreshTasks()
 		a.refreshDetail()
@@ -49,12 +52,37 @@ func (a *App) buildUI() {
 		a.refreshDetail()
 	})
 
-	flex := tview.NewFlex().
+	panes := tview.NewFlex().
 		AddItem(a.lists, 24, 0, true).
 		AddItem(a.tasks, 0, 2, false).
 		AddItem(a.detail, 0, 2, false)
 
-	a.app.SetRoot(flex, true)
+	root := tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(panes, 0, 1, true).
+		AddItem(a.footer, 1, 0, false)
+
+	a.app.SetRoot(root, true)
+	a.updateFooter()
+}
+
+// footerHint returns the keybinding hint line for the focused pane.
+func footerHint(focusIdx int) string {
+	switch focusIdx {
+	case 0: // Lists
+		return " Tab: pane  ↑↓/jk: move  a: new list  r: rename  x: delete  q: quit"
+	case 1: // Tasks
+		return " Tab: pane  ↑↓/jk: move  a: add  d: done  e: edit  x: delete  q: quit"
+	default: // Detail
+		return " Tab: pane  ↑↓: scroll  q: quit"
+	}
+}
+
+// updateFooter refreshes the hint bar to match the focused pane.
+func (a *App) updateFooter() {
+	if a.footer == nil {
+		return
+	}
+	a.footer.SetText(footerHint(a.focusIdx))
 }
 
 // refreshLists reloads the Lists pane from the service.
@@ -154,6 +182,7 @@ func (a *App) focus(i int) {
 	}
 	a.focusIdx = i
 	a.app.SetFocus(a.panes[i])
+	a.updateFooter()
 }
 
 // cycleFocus moves focus by delta with wraparound.
@@ -249,5 +278,7 @@ func (a *App) bindKeys() {
 		}
 		return ev
 	})
-	a.focus(0)
+	// Start on the Tasks pane so arrow keys move through tasks immediately
+	// (the Lists pane often holds just one list).
+	a.focus(1)
 }
