@@ -1,0 +1,27 @@
+README.md
+  s_cee99dc4d9ea23::t_f017654791fa06 42
+internal/adapter/tui/forms_test.go
+  s_cee99dc4d9ea23::t_e5f4c07661ccce 1-59
+internal/adapter/tui/forms.go
+  s_cee99dc4d9ea23::t_08f9edf2e6018c 160
+  s_cee99dc4d9ea23::t_92e4711ced5232 108
+  s_cee99dc4d9ea23::t_72c2fc8df2a10f 86
+  s_cee99dc4d9ea23::t_b20988051dbcdd 124
+  s_cee99dc4d9ea23::t_aef98f9f66ceee 7,11-26,29-32,34,43-49
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "6a5c5cca1150f5c7a97db0c30741efd83e7d486d",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
