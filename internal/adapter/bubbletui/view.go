@@ -7,9 +7,16 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// View renders the current mode. Form/confirm modes are added in Task 3.
+// View renders the current mode.
 func (m *Model) View() string {
-	return m.normalView()
+	switch m.mode {
+	case modeAddTask, modeEditTask, modeNewList, modeRenameList:
+		return m.formView()
+	case modeConfirm:
+		return m.confirmView()
+	default:
+		return m.normalView()
+	}
 }
 
 func (m *Model) paneWidths() (lists, tasks, detail int) {
