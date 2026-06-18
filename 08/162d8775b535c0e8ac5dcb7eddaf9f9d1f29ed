@@ -1,0 +1,25 @@
+internal/adapter/cli/cli_robust_test.go
+  s_cee99dc4d9ea23::t_66da715ad93378 1-57
+internal/adapter/cli/ls.go
+  s_cee99dc4d9ea23::t_dcebd8f18dfea5 4
+  s_cee99dc4d9ea23::t_a1f8f6bbe389cb 58
+internal/adapter/cli/lists.go
+  s_cee99dc4d9ea23::t_366b999e3c6f0b 23-25
+  s_cee99dc4d9ea23::t_a369d5b1e2de8b 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "08162d8775b535c0e8ac5dcb7eddaf9f9d1f29ed",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
