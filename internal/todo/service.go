@@ -55,3 +55,55 @@ func (s *Service) GetList(name string) (*List, error) {
 
 // ListNames returns the names of all stored lists.
 func (s *Service) ListNames() ([]string, error) { return s.repo.Names() }
+
+// mutate loads an existing list (by canonical name), applies fn, and saves it.
+func (s *Service) mutate(list string, fn func(*List) error) error {
+	name, err := NormalizeListName(list)
+	if err != nil {
+		return err
+	}
+	l, err := s.repo.Load(name)
+	if err != nil {
+		return err
+	}
+	if err := fn(l); err != nil {
+		return err
+	}
+	return s.repo.Save(l)
+}
+
+func (s *Service) ToggleTask(list string, id int) error {
+	return s.mutate(list, func(l *List) error { return l.Toggle(id) })
+}
+
+func (s *Service) SetTaskDone(list string, id int, done bool) error {
+	return s.mutate(list, func(l *List) error { return l.SetDone(id, done) })
+}
+
+func (s *Service) RemoveTask(list string, id int) error {
+	return s.mutate(list, func(l *List) error { return l.Remove(id) })
+}
+
+func (s *Service) EditTask(list string, id int, title, notes *string) error {
+	return s.mutate(list, func(l *List) error {
+		if title != nil {
+			if err := l.SetTitle(id, *title); err != nil {
+				return err
+			}
+		}
+		if notes != nil {
+			if err := l.SetNotes(id, *notes); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
+func (s *Service) AddTaskTag(list string, id int, tag string) error {
+	return s.mutate(list, func(l *List) error { return l.AddTag(id, tag) })
+}
+
+func (s *Service) RemoveTaskTag(list string, id int, tag string) error {
+	return s.mutate(list, func(l *List) error { return l.RemoveTag(id, tag) })
+}
