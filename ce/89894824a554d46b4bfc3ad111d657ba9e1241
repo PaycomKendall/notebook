@@ -1,0 +1,22 @@
+cmd/nb/main.go
+  s_cee99dc4d9ea23::t_bd873f72ba03e0 9
+  s_cee99dc4d9ea23::t_318ff0600be5c6 23
+README.md
+  s_cee99dc4d9ea23::t_366faaa3efe460 1-43
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.8",
+  "base_commit_sha": "ce89894824a554d46b4bfc3ad111d657ba9e1241",
+  "prompts": {},
+  "sessions": {
+    "s_cee99dc4d9ea23": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "39bde2b3-bc4c-484d-b9e2-06613ccd8c6a",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
