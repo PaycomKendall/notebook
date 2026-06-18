@@ -37,3 +37,44 @@ func (l *List) index(id int) int {
 	}
 	return -1
 }
+
+// Get returns a pointer to the task with the given id.
+func (l *List) Get(id int) (*Task, error) {
+	i := l.index(id)
+	if i < 0 {
+		return nil, ErrTaskNotFound
+	}
+	return &l.Tasks[i], nil
+}
+
+// Toggle flips the done state of a task.
+func (l *List) Toggle(id int) error {
+	i := l.index(id)
+	if i < 0 {
+		return ErrTaskNotFound
+	}
+	l.Tasks[i].Done = !l.Tasks[i].Done
+	l.Tasks[i].Updated = time.Now()
+	return nil
+}
+
+// SetDone sets the done state explicitly.
+func (l *List) SetDone(id int, done bool) error {
+	i := l.index(id)
+	if i < 0 {
+		return ErrTaskNotFound
+	}
+	l.Tasks[i].Done = done
+	l.Tasks[i].Updated = time.Now()
+	return nil
+}
+
+// Remove deletes a task by id.
+func (l *List) Remove(id int) error {
+	i := l.index(id)
+	if i < 0 {
+		return ErrTaskNotFound
+	}
+	l.Tasks = append(l.Tasks[:i], l.Tasks[i+1:]...)
+	return nil
+}
