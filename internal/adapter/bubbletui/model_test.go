@@ -18,7 +18,7 @@ func newTestModel(t *testing.T, seed func(*todo.Service)) (*Model, *todo.Service
 	if seed != nil {
 		seed(svc)
 	}
-	return New(svc), svc
+	return New(svc, themeDefault), svc
 }
 
 func TestNewLoadsListsAndTasks(t *testing.T) {
