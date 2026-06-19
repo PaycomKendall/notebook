@@ -32,6 +32,20 @@ func TestNormalViewShowsPanesAndFooter(t *testing.T) {
 	}
 }
 
+func TestFocusedPaneHasDistinctBorder(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _, _ = s.AddTask("work", "alpha", nil, "") })
+	m.focus = focusTasks
+	out := m.View()
+	// The focused pane uses a thick border; the others stay rounded. Both
+	// shapes must appear, so focus is visible regardless of palette.
+	if !strings.Contains(out, "┏") {
+		t.Errorf("focused pane should use a thick border (┏)\n%s", out)
+	}
+	if !strings.Contains(out, "╭") {
+		t.Errorf("unfocused panes should keep the rounded border (╭)\n%s", out)
+	}
+}
+
 func TestListsFooterDiffersFromTasks(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) { _, _ = s.AddTask("work", "alpha", nil, "") })
 	m.focus = focusLists

@@ -46,30 +46,28 @@ func (m *Model) normalView() string {
 
 func (m *Model) renderLists() string {
 	lw, _, _ := m.paneWidths()
+	focused := m.focus == focusLists
 	var b strings.Builder
-	b.WriteString(m.styles.title.Render("Lists") + "\n\n")
+	b.WriteString(m.titleFor("Lists", focused) + "\n\n")
 	for i, name := range m.listNames {
 		if i == m.listIdx {
-			b.WriteString(m.styles.sel.Render("❯ "+name) + "\n")
+			b.WriteString(m.selRow("❯ "+name, focused) + "\n")
 		} else {
 			b.WriteString("  " + name + "\n")
 		}
 	}
-	style := m.styles.pane
-	if m.focus == focusLists {
-		style = m.styles.paneFocused
-	}
-	return style.Width(lw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
+	return m.paneStyle(focused).Width(lw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
 }
 
 func (m *Model) renderTasks() string {
 	_, tw, _ := m.paneWidths()
+	focused := m.focus == focusTasks
 	title := "Tasks"
 	if n := m.currentListName(); n != "" {
 		title = "Tasks · " + n
 	}
 	var b strings.Builder
-	b.WriteString(m.styles.title.Render(title) + "\n\n")
+	b.WriteString(m.titleFor(title, focused) + "\n\n")
 	if m.current != nil {
 		for i, task := range m.current.Tasks {
 			box := "[ ]"
@@ -81,23 +79,20 @@ func (m *Model) renderTasks() string {
 				line += "  #" + strings.Join(task.Tags, " #")
 			}
 			if i == m.taskIdx {
-				b.WriteString(m.styles.sel.Render("❯ "+line) + "\n")
+				b.WriteString(m.selRow("❯ "+line, focused) + "\n")
 			} else {
 				b.WriteString("  " + line + "\n")
 			}
 		}
 	}
-	style := m.styles.pane
-	if m.focus == focusTasks {
-		style = m.styles.paneFocused
-	}
-	return style.Width(tw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
+	return m.paneStyle(focused).Width(tw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
 }
 
 func (m *Model) renderDetail() string {
 	_, _, dw := m.paneWidths()
+	focused := m.focus == focusDetail
 	var b strings.Builder
-	b.WriteString(m.styles.title.Render("Detail") + "\n\n")
+	b.WriteString(m.titleFor("Detail", focused) + "\n\n")
 	if t := m.selectedTask(); t != nil {
 		b.WriteString(lipgloss.NewStyle().Bold(true).Render(t.Title) + "\n")
 		if len(t.Tags) > 0 {
@@ -105,11 +100,31 @@ func (m *Model) renderDetail() string {
 		}
 		b.WriteString("\n" + m.styles.dim.Render("Notes") + "\n" + t.Notes)
 	}
-	style := m.styles.pane
-	if m.focus == focusDetail {
-		style = m.styles.paneFocused
+	return m.paneStyle(focused).Width(dw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
+}
+
+// titleFor renders a pane title as a filled chip when the pane is focused.
+func (m *Model) titleFor(s string, focused bool) string {
+	if focused {
+		return m.styles.titleFocused.Render(s)
 	}
-	return style.Width(dw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
+	return m.styles.title.Render(s)
+}
+
+// selRow renders the selected row bright when focused, dimmed otherwise.
+func (m *Model) selRow(s string, focused bool) string {
+	if focused {
+		return m.styles.sel.Render(s)
+	}
+	return m.styles.selDim.Render(s)
+}
+
+// paneStyle picks the thick focused border or the plain rounded one.
+func (m *Model) paneStyle(focused bool) lipgloss.Style {
+	if focused {
+		return m.styles.paneFocused
+	}
+	return m.styles.pane
 }
 
 // hint builds a footer line from key/label pairs using the model's styles.

@@ -31,16 +31,43 @@ func New(svc *todo.Service) *App {
 	return &App{svc: svc, app: tview.NewApplication()}
 }
 
+// Border/title colors signalling which pane holds focus.
+const (
+	focusColor   = tcell.ColorFuchsia // active pane border + title
+	unfocusColor = tcell.ColorGray    // inactive pane border + title
+)
+
+// markFocus installs focus/blur handlers that make box's border stand out
+// when it holds focus: an emboldened fuchsia border + title, dim gray when not.
+func markFocus(box *tview.Box) {
+	box.SetBorderColor(unfocusColor).SetTitleColor(unfocusColor)
+	box.SetFocusFunc(func() {
+		box.SetBorderColor(focusColor).SetTitleColor(focusColor).
+			SetBorderAttributes(tcell.AttrBold)
+	})
+	box.SetBlurFunc(func() {
+		box.SetBorderColor(unfocusColor).SetTitleColor(unfocusColor).
+			SetBorderAttributes(tcell.AttrNone)
+	})
+}
+
 // buildUI constructs the three-pane layout.
 func (a *App) buildUI() {
 	a.lists = tview.NewList().ShowSecondaryText(false)
 	a.lists.SetBorder(true).SetTitle(" Lists ")
+	// Only highlight the selected row in the pane that has focus, so the eye
+	// lands on a single active selection rather than three at once.
+	a.lists.SetSelectedFocusOnly(true)
+	markFocus(a.lists.Box)
 
 	a.tasks = tview.NewList().ShowSecondaryText(false)
 	a.tasks.SetBorder(true).SetTitle(" Tasks ")
+	a.tasks.SetSelectedFocusOnly(true)
+	markFocus(a.tasks.Box)
 
 	a.detail = tview.NewTextView().SetDynamicColors(true)
 	a.detail.SetBorder(true).SetTitle(" Detail ")
+	markFocus(a.detail.Box)
 
 	a.footer = tview.NewTextView().SetDynamicColors(true)
 
