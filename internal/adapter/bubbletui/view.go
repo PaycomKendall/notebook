@@ -104,9 +104,10 @@ func (m *Model) renderDetail() string {
 		contentW = 8
 	}
 
+	title := ""
 	var lines []string
 	if t := m.selectedTask(); t != nil {
-		lines = append(lines, lipgloss.NewStyle().Bold(true).Render(t.Title))
+		title = t.Title
 		if len(t.Tags) > 0 {
 			lines = append(lines, m.styles.tag.Render("#"+strings.Join(t.Tags, " #")))
 		}
@@ -114,19 +115,23 @@ func (m *Model) renderDetail() string {
 		lines = append(lines, strings.Split(markdown.Render(t.Notes, contentW, m.mdStyles()), "\n")...)
 	}
 
-	body := m.titleFor("Detail", focused) + "\n\n" + m.notebookPage(lines, contentW)
+	body := m.titleFor("Detail", focused) + "\n\n" + m.notebookPage(title, lines, contentW)
 	return m.paneStyle(focused).Width(dw).Height(m.paneHeight()).Render(strings.TrimRight(body, "\n"))
 }
 
-// notebookPage decorates content lines as a notebook page: a header band, a
-// separator rule, then guttered + margined + ruled rows filling the pane height.
-func (m *Model) notebookPage(lines []string, contentW int) string {
+// notebookPage decorates content lines as a notebook page: a header band showing
+// the task title, a separator rule, then guttered + margined + ruled rows
+// filling the pane height.
+func (m *Model) notebookPage(title string, lines []string, contentW int) string {
 	gutter := m.styles.dim.Render(ndGutter)
 	margin := m.styles.tag.Render(ndMargin)
 	rule := lipgloss.NewStyle().Underline(true).Foreground(m.theme.subtle)
 
+	if title == "" {
+		title = "Notebook"
+	}
 	var b strings.Builder
-	b.WriteString(gutter + margin + m.styles.dim.Render("N O T E B O O K") + "\n")
+	b.WriteString(gutter + margin + m.styles.title.Render(title) + "\n")
 	b.WriteString(gutter + margin + m.styles.dim.Render(strings.Repeat("─", contentW)) + "\n")
 
 	// rows = pane height minus the Detail title (1), the blank line (1),
