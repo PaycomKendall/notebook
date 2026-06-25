@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -47,6 +48,36 @@ func newInput(label, value string) formField {
 	return &lineField{ti: ti}
 }
 
+// areaField wraps a multi-line textarea. Its label is printed above it by
+// formView (textarea has no label/Prompt concept like textinput).
+type areaField struct {
+	ta  textarea.Model
+	lbl string
+}
+
+func (f *areaField) Focus() tea.Cmd { return f.ta.Focus() }
+func (f *areaField) Blur()          { f.ta.Blur() }
+func (f *areaField) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	f.ta, cmd = f.ta.Update(msg)
+	return cmd
+}
+func (f *areaField) View() string      { return f.ta.View() }
+func (f *areaField) Value() string     { return f.ta.Value() }
+func (f *areaField) SetValue(s string) { f.ta.SetValue(s) }
+func (f *areaField) label() string     { return f.lbl }
+func (f *areaField) multiline() bool   { return true }
+
+func newArea(label, value string) formField {
+	ta := textarea.New()
+	ta.ShowLineNumbers = false
+	ta.CharLimit = 2000
+	ta.SetWidth(38)
+	ta.SetHeight(5)
+	ta.SetValue(value)
+	return &areaField{ta: ta, lbl: label}
+}
+
 func (m *Model) refocusInputs() {
 	for i := range m.inputs {
 		if i == m.formField {
@@ -72,7 +103,7 @@ func (m *Model) openAddTask() {
 	m.inputs = []formField{
 		newInput("Title", ""),
 		newInput("Tags (space-separated)", ""),
-		newInput("Notes", ""),
+		newArea("Notes", ""),
 	}
 	m.formField = 0
 	m.refocusInputs()
@@ -88,7 +119,7 @@ func (m *Model) openEditTask() {
 	m.mode = modeEditTask
 	m.inputs = []formField{
 		newInput("Title", t.Title),
-		newInput("Notes", t.Notes),
+		newArea("Notes", t.Notes),
 	}
 	m.formField = 0
 	m.refocusInputs()
@@ -192,23 +223,41 @@ func (m *Model) submitForm() {
 
 // updateForm routes a key to the active form.
 func (m *Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "esc":
+	cur := m.inputs[m.formField]
+	switch msg.Type {
+	case tea.KeyEsc:
 		m.closeForm()
 		return m, nil
-	case "enter":
+	case tea.KeyCtrlS:
 		m.submitForm()
 		return m, nil
-	case "tab", "down":
+	case tea.KeyEnter:
+		if !cur.multiline() {
+			m.submitForm()
+			return m, nil
+		}
+		// multiline: fall through to delegate (inserts a newline)
+	case tea.KeyTab:
 		m.formField = (m.formField + 1) % len(m.inputs)
 		m.refocusInputs()
 		return m, nil
-	case "shift+tab", "up":
+	case tea.KeyShiftTab:
 		m.formField = (m.formField - 1 + len(m.inputs)) % len(m.inputs)
 		m.refocusInputs()
 		return m, nil
+	case tea.KeyDown, tea.KeyUp:
+		if !cur.multiline() {
+			step := 1
+			if msg.Type == tea.KeyUp {
+				step = -1
+			}
+			m.formField = (m.formField + step + len(m.inputs)) % len(m.inputs)
+			m.refocusInputs()
+			return m, nil
+		}
+		// multiline: fall through to delegate (cursor moves between lines)
 	}
-	cmd := m.inputs[m.formField].Update(msg)
+	cmd := cur.Update(msg)
 	return m, cmd
 }
 
@@ -278,7 +327,7 @@ func (m *Model) formView() string {
 		}
 		b.WriteString(m.inputs[i].View() + "\n")
 	}
-	b.WriteString("\n" + m.styles.dim.Render("tab/↑↓: move · enter: submit · esc: cancel"))
+	b.WriteString("\n" + m.styles.dim.Render("tab: move · ctrl+s: submit · esc: cancel"))
 	if m.status != "" {
 		b.WriteString("\n" + m.styles.warn.Render(m.status))
 	}
