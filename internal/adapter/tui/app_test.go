@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/gdamore/tcell/v2"
@@ -79,4 +80,23 @@ func indexOf(haystack, needle string) int {
 		}
 	}
 	return -1
+}
+
+func TestDetailRendersMarkdownNote(t *testing.T) {
+	app, svc := newTestApp(t)
+	if _, err := svc.AddTask("inbox", "task", nil, "# Heading\n- item"); err != nil {
+		t.Fatal(err)
+	}
+	app.buildUI()
+	app.refreshLists()
+	app.refreshTasks()
+	app.refreshDetail()
+
+	got := app.detail.GetText(true) // true = strip color tags
+	if strings.Contains(got, "# Heading") {
+		t.Errorf("header marker should be stripped, got: %q", got)
+	}
+	if !strings.Contains(got, "Heading") || !strings.Contains(got, "•") {
+		t.Errorf("rendered note missing content/bullet: %q", got)
+	}
 }

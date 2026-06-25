@@ -50,6 +50,49 @@ func TestAddTaskFormSubmits(t *testing.T) {
 	}
 }
 
+func TestNotesFieldIsMultiline(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.openAddTask()
+	// Notes is the 3rd field (index 2).
+	if !m.inputs[2].multiline() {
+		t.Fatalf("Notes field should be multiline")
+	}
+}
+
+func TestEnterInNotesInsertsNewlineNotSubmit(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.openAddTask()
+	typeStr(m, "title")
+	m.formField = 2 // Notes
+	m.refocusInputs()
+	typeStr(m, "line one")
+	m.updateForm(key("enter")) // should NOT submit; should add a newline
+	if m.mode != modeAddTask {
+		t.Fatalf("enter in multiline Notes must not submit; mode=%v", m.mode)
+	}
+	typeStr(m, "line two")
+	if !strings.Contains(m.inputs[2].Value(), "\n") {
+		t.Errorf("notes should contain a newline, got %q", m.inputs[2].Value())
+	}
+}
+
+func TestCtrlSSubmitsFromNotes(t *testing.T) {
+	m, svc := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.openAddTask()
+	typeStr(m, "buy milk")
+	m.formField = 2
+	m.refocusInputs()
+	typeStr(m, "2%")
+	m.updateForm(tea.KeyMsg{Type: tea.KeyCtrlS})
+	if m.mode != modeNormal {
+		t.Fatalf("ctrl+s should submit; mode=%v", m.mode)
+	}
+	l, _ := svc.GetList("work")
+	if len(l.Tasks) != 1 || l.Tasks[0].Notes != "2%" {
+		t.Fatalf("task not added with notes: %+v", l.Tasks)
+	}
+}
+
 func TestEmptyTitleKeepsFormOpen(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
 	m.openAddTask()

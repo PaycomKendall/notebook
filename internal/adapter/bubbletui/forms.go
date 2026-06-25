@@ -4,17 +4,78 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func newInput(label, value string) textinput.Model {
+// formField is a single field in a modal form. It abstracts over single-line
+// (textinput) and multi-line (textarea) widgets so the form loop stays generic.
+type formField interface {
+	Focus() tea.Cmd
+	Blur()
+	Update(tea.Msg) tea.Cmd
+	View() string
+	Value() string
+	SetValue(string)
+	label() string // a heading printed above the widget; "" if the widget shows its own
+	multiline() bool
+}
+
+// lineField wraps a single-line textinput. Its label lives in the input's
+// Prompt, so label() returns "".
+type lineField struct{ ti textinput.Model }
+
+func (f *lineField) Focus() tea.Cmd { return f.ti.Focus() }
+func (f *lineField) Blur()          { f.ti.Blur() }
+func (f *lineField) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	f.ti, cmd = f.ti.Update(msg)
+	return cmd
+}
+func (f *lineField) View() string      { return f.ti.View() }
+func (f *lineField) Value() string     { return f.ti.Value() }
+func (f *lineField) SetValue(s string) { f.ti.SetValue(s) }
+func (f *lineField) label() string     { return "" }
+func (f *lineField) multiline() bool   { return false }
+
+func newInput(label, value string) formField {
 	ti := textinput.New()
 	ti.Prompt = label + ": "
 	ti.SetValue(value)
 	ti.CharLimit = 200
 	ti.Width = 36
-	return ti
+	return &lineField{ti: ti}
+}
+
+// areaField wraps a multi-line textarea. Its label is printed above it by
+// formView (textarea has no label/Prompt concept like textinput).
+type areaField struct {
+	ta  textarea.Model
+	lbl string
+}
+
+func (f *areaField) Focus() tea.Cmd { return f.ta.Focus() }
+func (f *areaField) Blur()          { f.ta.Blur() }
+func (f *areaField) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	f.ta, cmd = f.ta.Update(msg)
+	return cmd
+}
+func (f *areaField) View() string      { return f.ta.View() }
+func (f *areaField) Value() string     { return f.ta.Value() }
+func (f *areaField) SetValue(s string) { f.ta.SetValue(s) }
+func (f *areaField) label() string     { return f.lbl }
+func (f *areaField) multiline() bool   { return true }
+
+func newArea(label, value string) formField {
+	ta := textarea.New()
+	ta.ShowLineNumbers = false
+	ta.CharLimit = 2000
+	ta.SetWidth(38)
+	ta.SetHeight(5)
+	ta.SetValue(value)
+	return &areaField{ta: ta, lbl: label}
 }
 
 func (m *Model) refocusInputs() {
@@ -39,10 +100,10 @@ func (m *Model) openAddTask() {
 		m.formList = "inbox"
 	}
 	m.mode = modeAddTask
-	m.inputs = []textinput.Model{
+	m.inputs = []formField{
 		newInput("Title", ""),
 		newInput("Tags (space-separated)", ""),
-		newInput("Notes", ""),
+		newArea("Notes", ""),
 	}
 	m.formField = 0
 	m.refocusInputs()
@@ -56,9 +117,9 @@ func (m *Model) openEditTask() {
 	m.formList = m.current.Name
 	m.formTaskID = t.ID
 	m.mode = modeEditTask
-	m.inputs = []textinput.Model{
+	m.inputs = []formField{
 		newInput("Title", t.Title),
-		newInput("Notes", t.Notes),
+		newArea("Notes", t.Notes),
 	}
 	m.formField = 0
 	m.refocusInputs()
@@ -66,7 +127,7 @@ func (m *Model) openEditTask() {
 
 func (m *Model) openNewList() {
 	m.mode = modeNewList
-	m.inputs = []textinput.Model{newInput("List name", "")}
+	m.inputs = []formField{newInput("List name", "")}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -78,7 +139,7 @@ func (m *Model) openRenameList() {
 	}
 	m.formOldName = old
 	m.mode = modeRenameList
-	m.inputs = []textinput.Model{newInput("New name", old)}
+	m.inputs = []formField{newInput("New name", old)}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -91,7 +152,7 @@ func (m *Model) openMoveTask() {
 	m.formList = m.current.Name
 	m.formTaskID = t.ID
 	m.mode = modeMoveTask
-	m.inputs = []textinput.Model{newInput("Move to list", "")}
+	m.inputs = []formField{newInput("Move to list", "")}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -162,24 +223,41 @@ func (m *Model) submitForm() {
 
 // updateForm routes a key to the active form.
 func (m *Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "esc":
+	cur := m.inputs[m.formField]
+	switch msg.Type {
+	case tea.KeyEsc:
 		m.closeForm()
 		return m, nil
-	case "enter":
+	case tea.KeyCtrlS:
 		m.submitForm()
 		return m, nil
-	case "tab", "down":
+	case tea.KeyEnter:
+		if !cur.multiline() {
+			m.submitForm()
+			return m, nil
+		}
+		// multiline: fall through to delegate (inserts a newline)
+	case tea.KeyTab:
 		m.formField = (m.formField + 1) % len(m.inputs)
 		m.refocusInputs()
 		return m, nil
-	case "shift+tab", "up":
+	case tea.KeyShiftTab:
 		m.formField = (m.formField - 1 + len(m.inputs)) % len(m.inputs)
 		m.refocusInputs()
 		return m, nil
+	case tea.KeyDown, tea.KeyUp:
+		if !cur.multiline() {
+			step := 1
+			if msg.Type == tea.KeyUp {
+				step = -1
+			}
+			m.formField = (m.formField + step + len(m.inputs)) % len(m.inputs)
+			m.refocusInputs()
+			return m, nil
+		}
+		// multiline: fall through to delegate (cursor moves between lines)
 	}
-	var cmd tea.Cmd
-	m.inputs[m.formField], cmd = m.inputs[m.formField].Update(msg)
+	cmd := cur.Update(msg)
 	return m, cmd
 }
 
@@ -244,9 +322,12 @@ func (m *Model) formView() string {
 	var b strings.Builder
 	b.WriteString(m.styles.title.Render(m.formTitle()) + "\n\n")
 	for i := range m.inputs {
+		if lbl := m.inputs[i].label(); lbl != "" {
+			b.WriteString(m.styles.dim.Render(lbl) + "\n")
+		}
 		b.WriteString(m.inputs[i].View() + "\n")
 	}
-	b.WriteString("\n" + m.styles.dim.Render("tab/↑↓: move · enter: submit · esc: cancel"))
+	b.WriteString("\n" + m.styles.dim.Render("tab: move · ctrl+s: submit · esc: cancel"))
 	if m.status != "" {
 		b.WriteString("\n" + m.styles.warn.Render(m.status))
 	}

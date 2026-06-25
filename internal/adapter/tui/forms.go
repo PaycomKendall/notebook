@@ -9,11 +9,12 @@ import (
 )
 
 // formHint is the keybinding hint shown in the footer of every input form.
-const formHint = " Tab/↑↓: move  ·  Enter: select  ·  Esc: cancel"
+const formHint = " Tab/↑↓: move  ·  Enter: newline in Notes  ·  Esc: cancel  (use buttons to submit)"
 
 // showModalForm displays a bordered form with a hint footer, wiring Esc to
 // cancel (restore the main view). All input forms go through this helper.
 func (a *App) showModalForm(form *tview.Form, title string) {
+	a.lastForm = form
 	form.SetBorder(true).SetTitle(title)
 	form.SetCancelFunc(func() { a.rebuildRoot() })
 	hint := tview.NewTextView().SetText(formHint)
@@ -72,7 +73,7 @@ func (a *App) addTaskForm() {
 	form := tview.NewForm().
 		AddInputField("Title", "", 40, nil, func(s string) { title = s }).
 		AddInputField("Tags (space-sep)", "", 40, nil, func(s string) { tags = s }).
-		AddInputField("Notes", "", 40, nil, func(s string) { notes = s })
+		AddTextArea("Notes", "", 40, 6, 0, func(s string) { notes = s })
 	form.AddButton("Add", func() {
 		if strings.TrimSpace(title) != "" {
 			_, _ = a.svc.AddTask(list, title, strings.Fields(tags), notes)
@@ -96,7 +97,7 @@ func (a *App) editTaskForm() {
 	title, notes := t.Title, t.Notes
 	form := tview.NewForm().
 		AddInputField("Title", title, 40, nil, func(s string) { title = s }).
-		AddInputField("Notes", notes, 40, nil, func(s string) { notes = s })
+		AddTextArea("Notes", notes, 40, 6, 0, func(s string) { notes = s })
 	form.AddButton("Save", func() {
 		tp, np := title, notes
 		_ = a.svc.EditTask(name, id, &tp, &np)
