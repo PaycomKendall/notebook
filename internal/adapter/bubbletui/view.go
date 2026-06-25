@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/kendallowen/notebook/internal/markdown"
 )
 
 // View renders the current mode.
@@ -88,19 +89,65 @@ func (m *Model) renderTasks() string {
 	return m.paneStyle(focused).Width(tw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
 }
 
+const (
+	ndGutter = "◦ " // spiral binding hole + space
+	ndMargin = "│ " // margin rule + space
+)
+
 func (m *Model) renderDetail() string {
 	_, _, dw := m.paneWidths()
 	focused := m.focus == focusDetail
-	var b strings.Builder
-	b.WriteString(m.titleFor("Detail", focused) + "\n\n")
-	if t := m.selectedTask(); t != nil {
-		b.WriteString(lipgloss.NewStyle().Bold(true).Render(t.Title) + "\n")
-		if len(t.Tags) > 0 {
-			b.WriteString(m.styles.tag.Render("#"+strings.Join(t.Tags, " #")) + "\n")
-		}
-		b.WriteString("\n" + m.styles.dim.Render("Notes") + "\n" + t.Notes)
+	// inner content width: pane width minus paneStyle's horizontal padding (1+1)
+	// minus the gutter and margin prefixes.
+	contentW := dw - 2 - lipgloss.Width(ndGutter) - lipgloss.Width(ndMargin)
+	if contentW < 8 {
+		contentW = 8
 	}
-	return m.paneStyle(focused).Width(dw).Height(m.paneHeight()).Render(strings.TrimRight(b.String(), "\n"))
+
+	var lines []string
+	if t := m.selectedTask(); t != nil {
+		lines = append(lines, lipgloss.NewStyle().Bold(true).Render(t.Title))
+		if len(t.Tags) > 0 {
+			lines = append(lines, m.styles.tag.Render("#"+strings.Join(t.Tags, " #")))
+		}
+		lines = append(lines, "")
+		lines = append(lines, strings.Split(markdown.Render(t.Notes, contentW, m.mdStyles()), "\n")...)
+	}
+
+	body := m.titleFor("Detail", focused) + "\n\n" + m.notebookPage(lines, contentW)
+	return m.paneStyle(focused).Width(dw).Height(m.paneHeight()).Render(strings.TrimRight(body, "\n"))
+}
+
+// notebookPage decorates content lines as a notebook page: a header band, a
+// separator rule, then guttered + margined + ruled rows filling the pane height.
+func (m *Model) notebookPage(lines []string, contentW int) string {
+	gutter := m.styles.dim.Render(ndGutter)
+	margin := m.styles.tag.Render(ndMargin)
+	rule := lipgloss.NewStyle().Underline(true).Foreground(m.theme.subtle)
+
+	var b strings.Builder
+	b.WriteString(gutter + margin + m.styles.dim.Render("N O T E B O O K") + "\n")
+	b.WriteString(gutter + margin + m.styles.dim.Render(strings.Repeat("─", contentW)) + "\n")
+
+	// rows = pane height minus the Detail title (1), the blank line (1),
+	// the header band (1) and the separator (1).
+	rows := m.paneHeight() - 4
+	if rows < 1 {
+		rows = 1
+	}
+	for i := 0; i < rows; i++ {
+		text := ""
+		if i < len(lines) {
+			text = lines[i]
+		}
+		// pad to contentW so the underline spans the full page width.
+		pad := contentW - lipgloss.Width(text)
+		if pad < 0 {
+			pad = 0
+		}
+		b.WriteString(gutter + margin + rule.Render(text+strings.Repeat(" ", pad)) + "\n")
+	}
+	return strings.TrimRight(b.String(), "\n")
 }
 
 // titleFor renders a pane title as a filled chip when the pane is focused.

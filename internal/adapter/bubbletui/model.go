@@ -49,12 +49,13 @@ type Model struct {
 	status        string
 	width, height int
 
+	theme  Theme
 	styles Styles
 }
 
 // New builds a Model with the given theme and loads the initial lists + tasks.
 func New(svc *todo.Service, theme Theme) *Model {
-	m := &Model{svc: svc, width: 90, height: 24, focus: focusTasks, styles: theme.styles()}
+	m := &Model{svc: svc, width: 90, height: 24, focus: focusTasks, theme: theme, styles: theme.styles()}
 	m.reloadLists()
 	m.reloadTasks()
 	return m

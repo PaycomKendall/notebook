@@ -1,6 +1,9 @@
 package bubbletui
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/lipgloss"
+	"github.com/kendallowen/notebook/internal/markdown"
+)
 
 // Styles holds the computed lipgloss styles for a Theme.
 type Styles struct {
@@ -30,3 +33,18 @@ func (t Theme) styles() Styles {
 		modal:       lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(t.accent).Padding(1, 2),
 	}
 }
+
+// mdStyles maps the active theme to markdown element styles for the Detail pane.
+func (m *Model) mdStyles() markdown.Styles {
+	return markdown.Styles{
+		H1:     lipgloss.NewStyle().Bold(true).Foreground(m.themeAccent()),
+		H2:     lipgloss.NewStyle().Bold(true).Foreground(m.themeAccent()),
+		H3:     lipgloss.NewStyle().Bold(true).Foreground(m.themeAccent()),
+		Bold:   lipgloss.NewStyle().Bold(true),
+		Italic: lipgloss.NewStyle().Italic(true),
+		Code:   m.styles.tag,
+		Bullet: m.styles.tag,
+	}
+}
+
+func (m *Model) themeAccent() lipgloss.TerminalColor { return m.theme.accent }

@@ -46,6 +46,38 @@ func TestFocusedPaneHasDistinctBorder(t *testing.T) {
 	}
 }
 
+func TestDetailShowsNotebookChrome(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) {
+		_, _ = s.AddTask("work", "task", nil, "# Plan\n- step one")
+	})
+	m.focus = focusDetail
+	out := m.renderDetail()
+	if !strings.Contains(out, "◦") {
+		t.Errorf("expected spiral binding gutter, got:\n%s", out)
+	}
+	if !strings.Contains(out, "N O T E B O O K") {
+		t.Errorf("expected header band, got:\n%s", out)
+	}
+	if !strings.Contains(out, "•") {
+		t.Errorf("expected rendered bullet, got:\n%s", out)
+	}
+	if strings.Contains(out, "# Plan") {
+		t.Errorf("markdown header marker should be stripped, got:\n%s", out)
+	}
+}
+
+func TestDetailEmptyNoteStillLined(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) {
+		_, _ = s.AddTask("work", "task", nil, "")
+	})
+	m.focus = focusDetail
+	out := m.renderDetail()
+	// Gutter glyph appears on filler rows even with no note text.
+	if strings.Count(out, "◦") < 2 {
+		t.Errorf("empty note should still render lined page, got:\n%s", out)
+	}
+}
+
 func TestListsFooterDiffersFromTasks(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) { _, _ = s.AddTask("work", "alpha", nil, "") })
 	m.focus = focusLists
