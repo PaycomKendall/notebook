@@ -8,13 +8,43 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func newInput(label, value string) textinput.Model {
+// formField is a single field in a modal form. It abstracts over single-line
+// (textinput) and multi-line (textarea) widgets so the form loop stays generic.
+type formField interface {
+	Focus() tea.Cmd
+	Blur()
+	Update(tea.Msg) tea.Cmd
+	View() string
+	Value() string
+	SetValue(string)
+	label() string // a heading printed above the widget; "" if the widget shows its own
+	multiline() bool
+}
+
+// lineField wraps a single-line textinput. Its label lives in the input's
+// Prompt, so label() returns "".
+type lineField struct{ ti textinput.Model }
+
+func (f *lineField) Focus() tea.Cmd { return f.ti.Focus() }
+func (f *lineField) Blur()          { f.ti.Blur() }
+func (f *lineField) Update(msg tea.Msg) tea.Cmd {
+	var cmd tea.Cmd
+	f.ti, cmd = f.ti.Update(msg)
+	return cmd
+}
+func (f *lineField) View() string      { return f.ti.View() }
+func (f *lineField) Value() string     { return f.ti.Value() }
+func (f *lineField) SetValue(s string) { f.ti.SetValue(s) }
+func (f *lineField) label() string     { return "" }
+func (f *lineField) multiline() bool   { return false }
+
+func newInput(label, value string) formField {
 	ti := textinput.New()
 	ti.Prompt = label + ": "
 	ti.SetValue(value)
 	ti.CharLimit = 200
 	ti.Width = 36
-	return ti
+	return &lineField{ti: ti}
 }
 
 func (m *Model) refocusInputs() {
@@ -39,7 +69,7 @@ func (m *Model) openAddTask() {
 		m.formList = "inbox"
 	}
 	m.mode = modeAddTask
-	m.inputs = []textinput.Model{
+	m.inputs = []formField{
 		newInput("Title", ""),
 		newInput("Tags (space-separated)", ""),
 		newInput("Notes", ""),
@@ -56,7 +86,7 @@ func (m *Model) openEditTask() {
 	m.formList = m.current.Name
 	m.formTaskID = t.ID
 	m.mode = modeEditTask
-	m.inputs = []textinput.Model{
+	m.inputs = []formField{
 		newInput("Title", t.Title),
 		newInput("Notes", t.Notes),
 	}
@@ -66,7 +96,7 @@ func (m *Model) openEditTask() {
 
 func (m *Model) openNewList() {
 	m.mode = modeNewList
-	m.inputs = []textinput.Model{newInput("List name", "")}
+	m.inputs = []formField{newInput("List name", "")}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -78,7 +108,7 @@ func (m *Model) openRenameList() {
 	}
 	m.formOldName = old
 	m.mode = modeRenameList
-	m.inputs = []textinput.Model{newInput("New name", old)}
+	m.inputs = []formField{newInput("New name", old)}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -91,7 +121,7 @@ func (m *Model) openMoveTask() {
 	m.formList = m.current.Name
 	m.formTaskID = t.ID
 	m.mode = modeMoveTask
-	m.inputs = []textinput.Model{newInput("Move to list", "")}
+	m.inputs = []formField{newInput("Move to list", "")}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -178,8 +208,7 @@ func (m *Model) updateForm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.refocusInputs()
 		return m, nil
 	}
-	var cmd tea.Cmd
-	m.inputs[m.formField], cmd = m.inputs[m.formField].Update(msg)
+	cmd := m.inputs[m.formField].Update(msg)
 	return m, cmd
 }
 
@@ -244,6 +273,9 @@ func (m *Model) formView() string {
 	var b strings.Builder
 	b.WriteString(m.styles.title.Render(m.formTitle()) + "\n\n")
 	for i := range m.inputs {
+		if lbl := m.inputs[i].label(); lbl != "" {
+			b.WriteString(m.styles.dim.Render(lbl) + "\n")
+		}
 		b.WriteString(m.inputs[i].View() + "\n")
 	}
 	b.WriteString("\n" + m.styles.dim.Render("tab/↑↓: move · enter: submit · esc: cancel"))

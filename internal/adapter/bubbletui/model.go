@@ -1,7 +1,6 @@
 package bubbletui
 
 import (
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/kendallowen/notebook/internal/todo"
 )
@@ -38,7 +37,7 @@ type Model struct {
 	focus focusPane
 	mode  mode
 
-	inputs      []textinput.Model
+	inputs      []formField
 	formField   int
 	formList    string
 	formTaskID  int
