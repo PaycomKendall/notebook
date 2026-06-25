@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-06-25-formatted-notes-design.md
+  s_2e2027d2681ff5::t_960a7cdbb2acb0 1-134
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "58074aa65b390bfd41f905ebde98a33b6171aed4",
+  "prompts": {},
+  "sessions": {
+    "s_2e2027d2681ff5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36316f47-d703-4b2c-af95-67e040b133de",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
