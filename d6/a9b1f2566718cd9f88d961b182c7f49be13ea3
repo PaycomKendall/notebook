@@ -1,0 +1,21 @@
+internal/markdown/markdown_test.go
+  s_2e2027d2681ff5::t_08b8eefc9d0182 1-81
+internal/markdown/markdown.go
+  s_2e2027d2681ff5::t_b239367b932078 1-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "d6a9b1f2566718cd9f88d961b182c7f49be13ea3",
+  "prompts": {},
+  "sessions": {
+    "s_2e2027d2681ff5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36316f47-d703-4b2c-af95-67e040b133de",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
