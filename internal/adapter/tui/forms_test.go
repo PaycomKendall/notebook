@@ -57,3 +57,33 @@ func TestFormShowsHintFooter(t *testing.T) {
 		t.Error("form should display a hint footer mentioning Tab and Esc")
 	}
 }
+
+// Verifies a multi-line note round-trips through the edit form's Save handler.
+func TestEditFormAcceptsMultilineNotes(t *testing.T) {
+	app, svc := newTestApp(t)
+	if _, err := svc.AddTask("inbox", "task", nil, "old"); err != nil {
+		t.Fatal(err)
+	}
+	app.buildUI()
+	app.refreshLists()
+	app.refreshTasks()
+	app.editTaskForm() // builds the form and records app.lastForm
+
+	item := app.lastForm.GetFormItemByLabel("Notes")
+	ta, ok := item.(*tview.TextArea)
+	if !ok {
+		t.Fatalf("Notes item is %T, want *tview.TextArea", item)
+	}
+	ta.SetText("line one\nline two", true)
+
+	// Trigger the Save button (index 0) via its input handler.
+	app.lastForm.GetButton(0).InputHandler()(
+		tcell.NewEventKey(tcell.KeyEnter, 0, tcell.ModNone),
+		func(tview.Primitive) {},
+	)
+
+	l, _ := svc.GetList("inbox")
+	if l.Tasks[0].Notes != "line one\nline two" {
+		t.Errorf("notes = %q, want multi-line", l.Tasks[0].Notes)
+	}
+}

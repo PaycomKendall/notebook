@@ -34,6 +34,8 @@ type App struct {
 	detail *tview.TextView
 	footer *tview.TextView
 
+	lastForm *tview.Form // most recently shown modal form (test seam)
+
 	listNames []string
 	current   *todo.List // currently displayed list
 
