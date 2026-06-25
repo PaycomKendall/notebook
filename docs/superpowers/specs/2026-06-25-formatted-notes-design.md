@@ -13,6 +13,10 @@ Allow richer task notes in both TUIs:
 2. **Markdown styling in the Detail pane** — render a useful subset of markdown
    (headers, bold, italic, inline code, bullet/numbered lists) instead of raw
    text, themed to match the active TUI theme.
+3. **"Notebook page" look for the Detail pane** — in the Bubble Tea TUI, dress
+   the Detail pane to read like a sheet of notebook paper (header band, spiral
+   binding gutter, margin rule, faint ruled lines), and widen it so the page
+   has room to breathe.
 
 ## Decisions
 
@@ -22,8 +26,11 @@ Allow richer task notes in both TUIs:
   clash with the existing `nord`/`dracula`/`gruvbox`/`mono`/`default` themes.
   Zero new dependencies; fully unit-testable.
 - **Scope:** both TUIs (tview default + Bubble Tea), matching the established
-  feature-parity pattern. The CLI is unchanged: `-n` already accepts any string
-  (newlines pass through), and markdown rendering is a display-only concern.
+  feature-parity pattern, for the **multi-line input** and **markdown
+  rendering**. The **"notebook page" Detail styling and the widened pane split
+  are Bubble Tea only** (the user's explicit scope; tview's `TextView` makes
+  per-line ruling/gutters awkward). The CLI is unchanged: `-n` already accepts
+  any string (newlines pass through), and rendering is a display-only concern.
 - **Storage:** unchanged. `todo.Task.Notes` stays a `string`, now permitted to
   contain newlines and markdown. JSON already round-trips this, so the change is
   fully backward compatible — existing single-line notes render unchanged.
@@ -66,13 +73,15 @@ nested lists, link/image rendering (URLs shown as-is).
 
 ### 2. Detail pane wiring
 
-- **bubbletui** (`view.go`): replace the raw `t.Notes` write with
-  `markdown.Render(t.Notes, detailWidth, mdStyles)`, where `mdStyles` is built
+- **bubbletui** (`view.go`): render markdown, then wrap it in the notebook-page
+  decoration (see §5). The markdown is produced with
+  `markdown.Render(t.Notes, innerWidth, mdStyles)`, where `innerWidth` is the
+  Detail width minus the binding gutter and margin rule, and `mdStyles` is built
   from the active theme.
 - **tview** (`app.go`): `a.detail.SetText(tview.TranslateANSI(markdown.Render(
   t.Notes, 0, mdStyles)))` and set `SetDynamicColors(true)` on the Detail
   `TextView`. `TranslateANSI` converts the renderer's ANSI output into tview's
-  style tags.
+  style tags. tview gets markdown rendering only — **no** notebook chrome.
 
 ### 3. Multi-line input — bubbletui
 
@@ -117,13 +126,51 @@ textarea is focused).
 textarea is focused in tview's pinned version. Fallback if not: a form-level
 `SetInputCapture` that remaps Tab/Shift-Tab to field navigation.
 
+### 5. Notebook-page Detail styling — bubbletui only
+
+`renderDetail` decorates the markdown output so the pane reads like notebook
+paper. This is a line-oriented decoration layer applied around `markdown.Render`
+output; it does not change the renderer. Elements (the approved **option D**,
+all combined):
+
+- **Header band:** a dim, letter-spaced label line beneath the pane title
+  (e.g. `N O T E B O O K`) followed by a separator rule.
+- **Spiral binding gutter:** a left column showing `◦ ` per content line, in the
+  theme's subtle color.
+- **Margin rule:** a colored vertical line between the gutter and the text
+  (theme accent / a warm color), rendered per line.
+- **Ruled lines:** each content line padded to the inner width and given a faint
+  underline, so blank space below text still shows rules like lined paper.
+
+Implementation notes: built per visual line in `renderDetail` using the active
+theme's lipgloss styles. The width passed to `markdown.Render` is reduced by the
+gutter + margin width so wrapping accounts for the chrome. Ruled lines fill the
+pane's full height (`paneHeight`) so the page looks lined even past the note's
+end. Empty-note state still shows a lined, empty page.
+
+### 6. Widened Detail pane — bubbletui only
+
+In `paneWidths` (`view.go`), flip the split of the available width (after the
+fixed Lists column) from today's Tasks 3/5 ÷ Detail 2/5 to **Tasks 2/5 ÷ Detail
+3/5**:
+
+```go
+tasks  = avail * 2 / 5
+detail = avail - tasks
+```
+
+The Tasks pane only shows one-line titles, so it stays comfortable while the
+notebook page gets the dominant share. tview layout is unchanged.
+
 ## Testing
 
 - `internal/markdown`: table-driven tests for each block/inline element, word
   wrapping at a given width, and the plain-text passthrough case.
 - bubbletui: extend form tests for the `formField` abstraction, Ctrl+S submit,
   Enter-inserts-newline inside Notes, and Tab navigation across mixed field
-  types.
+  types. Add a `paneWidths` test asserting Detail ≥ Tasks after the split flip,
+  and a `renderDetail` test asserting the notebook chrome (gutter, header band)
+  is present and that an empty note still produces a lined page.
 - tview: extend form tests to confirm the Notes field accepts multi-line text
   and round-trips through `EditTask`.
 
@@ -132,3 +179,5 @@ textarea is focused in tview's pinned version. Fallback if not: a form-level
 - No CLI changes.
 - No markdown rendering in the task-list pane (titles stay plain).
 - No fenced code blocks / tables / link rendering in v1.
+- No notebook-page styling or pane-width change in the tview TUI (Bubble Tea
+  only, per the user's scope).
