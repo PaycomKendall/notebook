@@ -1,0 +1,22 @@
+internal/adapter/bubbletui/view.go
+  s_2e2027d2681ff5::t_117e7e588bebc3 107,110,118,122-125,130-132,134
+internal/adapter/bubbletui/view_test.go
+  s_2e2027d2681ff5::t_3ba8411ad0cc6e 77,84-85
+  s_2e2027d2681ff5::t_d49d8762286a69 12-18,23,31-32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "ce7dc61d2e27d39e3fbd4a4a80f3dbc7f8c9bbae",
+  "prompts": {},
+  "sessions": {
+    "s_2e2027d2681ff5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36316f47-d703-4b2c-af95-67e040b133de",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
