@@ -1,0 +1,21 @@
+internal/adapter/bubbletui/view.go
+  s_2e2027d2681ff5::t_46ebd59f3e42dd 29
+internal/adapter/bubbletui/view_test.go
+  s_2e2027d2681ff5::t_31ca714e8ae247 81-90
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "c82a4311c1a85337cf72fcfeefc1d117ad7e8fd7",
+  "prompts": {},
+  "sessions": {
+    "s_2e2027d2681ff5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36316f47-d703-4b2c-af95-67e040b133de",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
