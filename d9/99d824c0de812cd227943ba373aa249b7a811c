@@ -1,0 +1,19 @@
+.gitignore
+  s_2e2027d2681ff5::t_283f74e0c0f86a 12-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.1",
+  "base_commit_sha": "d999d824c0de812cd227943ba373aa249b7a811c",
+  "prompts": {},
+  "sessions": {
+    "s_2e2027d2681ff5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "36316f47-d703-4b2c-af95-67e040b133de",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
