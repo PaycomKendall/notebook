@@ -26,7 +26,7 @@ func (m *Model) paneWidths() (lists, tasks, detail int) {
 	if avail < 36 {
 		avail = 36
 	}
-	tasks = avail * 3 / 5
+	tasks = avail * 2 / 5
 	detail = avail - tasks
 	return
 }

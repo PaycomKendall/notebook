@@ -78,6 +78,16 @@ func TestDetailEmptyNoteStillLined(t *testing.T) {
 	}
 }
 
+func TestDetailPaneWiderThanTasks(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.width = 120
+	m.height = 30
+	_, tasks, detail := m.paneWidths()
+	if detail <= tasks {
+		t.Errorf("detail (%d) should be wider than tasks (%d)", detail, tasks)
+	}
+}
+
 func TestListsFooterDiffersFromTasks(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) { _, _ = s.AddTask("work", "alpha", nil, "") })
 	m.focus = focusLists
