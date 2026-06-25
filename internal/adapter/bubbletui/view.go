@@ -140,14 +140,27 @@ func (m *Model) notebookPage(lines []string, contentW int) string {
 		if i < len(lines) {
 			text = lines[i]
 		}
-		// pad to contentW so the underline spans the full page width.
-		pad := contentW - lipgloss.Width(text)
-		if pad < 0 {
-			pad = 0
-		}
-		b.WriteString(gutter + margin + rule.Render(text+strings.Repeat(" ", pad)) + "\n")
+		b.WriteString(gutter + margin + ruledLine(text, contentW, rule) + "\n")
 	}
 	return strings.TrimRight(b.String(), "\n")
+}
+
+// ruledLine renders one notebook row, padded to contentW and underlined to look
+// like a ruled line. If text already contains ANSI styling (the bold title, a
+// tag, or an inline bold/code span), only the trailing padding is underlined:
+// wrapping already-styled text in another lipgloss style corrupts the embedded
+// escapes — lipgloss emits the ESC byte bare, so the terminal prints the rest of
+// the sequence ("[1m") as literal text. Plain rows are underlined whole.
+func ruledLine(text string, contentW int, rule lipgloss.Style) string {
+	pad := contentW - lipgloss.Width(text)
+	if pad < 0 {
+		pad = 0
+	}
+	spaces := strings.Repeat(" ", pad)
+	if strings.ContainsRune(text, '\x1b') {
+		return text + rule.Render(spaces)
+	}
+	return rule.Render(text + spaces)
 }
 
 // titleFor renders a pane title as a filled chip when the pane is focused.

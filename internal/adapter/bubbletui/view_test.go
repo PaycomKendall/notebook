@@ -4,8 +4,35 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/kendallowen/notebook/internal/todo"
+	"github.com/muesli/termenv"
 )
+
+// With a real color profile active, the notebook chrome must not corrupt the
+// pre-styled (bold) title line. Wrapping already-styled text in another lipgloss
+// style (the underline rule) emits the embedded ESC bytes bare, so the terminal
+// prints the rest of the sequence ("[1m") as literal text. The corruption
+// signature is two consecutive ESC bytes.
+func TestDetailNotebookPreservesStyledTitle(t *testing.T) {
+	lipgloss.SetColorProfile(termenv.TrueColor)
+	defer lipgloss.SetColorProfile(termenv.Ascii)
+
+	m, _ := newTestModel(t, func(s *todo.Service) {
+		_, _ = s.AddTask("work", "Module history", nil, "WIP: Position")
+	})
+	m.focus = focusDetail
+	out := m.renderDetail()
+
+	if strings.Contains(out, "\x1b\x1b") {
+		t.Errorf("double-ESC corruption from styling already-styled text:\n%q", out)
+	}
+	// The bold title must survive as a well-formed escape sequence, not be
+	// re-styled per-rune (which is what produced the corruption).
+	if !strings.Contains(out, "\x1b[1mModule history\x1b[0m") {
+		t.Errorf("bold title not rendered as a clean escape sequence:\n%q", out)
+	}
+}
 
 func TestNormalViewShowsPanesAndFooter(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) {
