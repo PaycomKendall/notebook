@@ -4,10 +4,25 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/gdamore/tcell/v2"
+	"github.com/kendallowen/notebook/internal/markdown"
 	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/rivo/tview"
 )
+
+// detailMD is the markdown styling used in the tview Detail pane. tview has no
+// theme palette, so these are fixed; markdown.Render emits ANSI which
+// tview.TranslateANSI converts to tview's color tags.
+var detailMD = markdown.Styles{
+	H1:     lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12")),
+	H2:     lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12")),
+	H3:     lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("12")),
+	Bold:   lipgloss.NewStyle().Bold(true),
+	Italic: lipgloss.NewStyle().Italic(true),
+	Code:   lipgloss.NewStyle().Foreground(lipgloss.Color("10")),
+	Bullet: lipgloss.NewStyle().Foreground(lipgloss.Color("12")),
+}
 
 // App is the tview front-end over the shared Service.
 type App struct {
@@ -185,7 +200,7 @@ func (a *App) refreshDetail() {
 	if len(t.Tags) > 0 {
 		fmt.Fprintf(&b, "#%s\n\n", strings.Join(t.Tags, " #"))
 	}
-	fmt.Fprintf(&b, "Notes:\n%s\n", t.Notes)
+	fmt.Fprintf(&b, "Notes:\n%s\n", tview.TranslateANSI(markdown.Render(t.Notes, 0, detailMD)))
 	a.detail.SetText(b.String())
 }
 
