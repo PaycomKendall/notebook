@@ -84,7 +84,7 @@ func (a *App) addTaskForm() {
 		a.refreshDetail()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	a.showModalForm(form, " Add task ")
+	a.showModalForm(form, " Add page ")
 }
 
 // editTaskForm edits the selected task's title and notes.
@@ -106,14 +106,14 @@ func (a *App) editTaskForm() {
 		a.refreshDetail()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	a.showModalForm(form, " Edit task ")
+	a.showModalForm(form, " Edit page ")
 }
 
 // newListForm creates a new list.
 func (a *App) newListForm() {
 	var name string
 	form := tview.NewForm().
-		AddInputField("List name", "", 30, nil, func(s string) { name = s })
+		AddInputField("Folder name", "", 30, nil, func(s string) { name = s })
 	form.AddButton("Create", func() {
 		if strings.TrimSpace(name) != "" {
 			_ = a.svc.CreateList(name)
@@ -122,7 +122,7 @@ func (a *App) newListForm() {
 		a.refreshLists()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	a.showModalForm(form, " New list ")
+	a.showModalForm(form, " New folder ")
 }
 
 // deleteSelectedList removes the highlighted list after confirmation.
@@ -131,7 +131,7 @@ func (a *App) deleteSelectedList() {
 	if name == "" {
 		return
 	}
-	a.confirm(fmt.Sprintf("Delete list %q and all its tasks?", name), func() {
+	a.confirm(fmt.Sprintf("Delete folder %q and all its pages?", name), func() {
 		_ = a.svc.DeleteList(name)
 		a.refreshLists()
 		a.refreshTasks()
@@ -158,7 +158,7 @@ func (a *App) renameListForm() {
 		a.refreshDetail()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	a.showModalForm(form, " Rename list ")
+	a.showModalForm(form, " Rename folder ")
 }
 
 // moveTaskForm moves the selected task to another list (auto-created if new).
@@ -170,7 +170,7 @@ func (a *App) moveTaskForm() {
 	src, id := a.current.Name, t.ID
 	var dest string
 	form := tview.NewForm().
-		AddInputField("Move to list", "", 30, nil, func(s string) { dest = s })
+		AddInputField("Move to folder", "", 30, nil, func(s string) { dest = s })
 	form.AddButton("Move", func() {
 		if strings.TrimSpace(dest) != "" {
 			_, _ = a.svc.MoveTask(src, id, dest)
@@ -181,5 +181,5 @@ func (a *App) moveTaskForm() {
 		a.refreshDetail()
 	})
 	form.AddButton("Cancel", func() { a.rebuildRoot() })
-	a.showModalForm(form, " Move task ")
+	a.showModalForm(form, " Move page ")
 }

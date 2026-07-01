@@ -127,7 +127,7 @@ func (m *Model) openEditTask() {
 
 func (m *Model) openNewList() {
 	m.mode = modeNewList
-	m.inputs = []formField{newInput("List name", "")}
+	m.inputs = []formField{newInput("Folder name", "")}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -152,7 +152,7 @@ func (m *Model) openMoveTask() {
 	m.formList = m.current.Name
 	m.formTaskID = t.ID
 	m.mode = modeMoveTask
-	m.inputs = []formField{newInput("Move to list", "")}
+	m.inputs = []formField{newInput("Move to folder", "")}
 	m.formField = 0
 	m.refocusInputs()
 }
@@ -277,7 +277,7 @@ func (m *Model) confirmDeleteList() {
 	if name == "" {
 		return
 	}
-	m.confirmPrompt = fmt.Sprintf("Delete list %q and all its tasks?", name)
+	m.confirmPrompt = fmt.Sprintf("Delete folder %q and all its pages?", name)
 	m.confirmAction = func() error { return m.svc.DeleteList(name) }
 	m.mode = modeConfirm
 }
@@ -305,15 +305,15 @@ func (m *Model) updateConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 func (m *Model) formTitle() string {
 	switch m.mode {
 	case modeAddTask:
-		return "Add task"
+		return "Add page"
 	case modeEditTask:
-		return "Edit task"
+		return "Edit page"
 	case modeNewList:
-		return "New list"
+		return "New folder"
 	case modeRenameList:
-		return "Rename list"
+		return "Rename folder"
 	case modeMoveTask:
-		return "Move task"
+		return "Move page"
 	}
 	return ""
 }

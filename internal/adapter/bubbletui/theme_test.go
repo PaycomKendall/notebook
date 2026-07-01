@@ -23,7 +23,7 @@ func TestResolveThemeDefaultsAndKnown(t *testing.T) {
 	if got != themeDefault {
 		t.Error("empty name should resolve to the default theme")
 	}
-	for _, name := range []string{"default", "nord", "dracula", "gruvbox", "mono"} {
+	for _, name := range []string{"default", "nord", "dracula", "gruvbox", "mono", "notebook", "notebook-dark"} {
 		if _, err := resolveTheme(name); err != nil {
 			t.Errorf("resolveTheme(%q) = %v", name, err)
 		}

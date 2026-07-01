@@ -40,7 +40,7 @@ func TestFooterShowsContextualHints(t *testing.T) {
 
 	app.focus(0) // Lists pane
 	listsHint := app.footer.GetText(true)
-	for _, want := range []string{"Tab", "new list", "rename", "quit"} {
+	for _, want := range []string{"Tab", "new folder", "rename", "quit"} {
 		if !strings.Contains(listsHint, want) {
 			t.Errorf("lists footer missing %q; got %q", want, listsHint)
 		}

@@ -142,7 +142,7 @@ func TestFormViewShowsFieldsAndHint(t *testing.T) {
 	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
 	m.openAddTask()
 	out := m.View()
-	for _, want := range []string{"Add task", "Title", "Notes", "esc", "cancel"} {
+	for _, want := range []string{"Add page", "Title", "Notes", "esc", "cancel"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("formView missing %q\n%s", want, out)
 		}

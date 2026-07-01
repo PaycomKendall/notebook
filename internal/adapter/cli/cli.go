@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/kendallowen/notebook/internal/todo"
 	"github.com/spf13/cobra"
@@ -19,15 +20,50 @@ func resolveList(flag string) string {
 	return "inbox"
 }
 
-// banner is the Modular-font "Notebook" wordmark shown atop the help output.
-const banner = `
- __    _  _______  _______  _______  _______  _______  _______  ___   _
-|  |  | ||       ||       ||       ||  _    ||       ||       ||   | | |
-|   |_| ||   _   ||_     _||    ___|| |_|   ||   _   ||   _   ||   |_| |
-|       ||  | |  |  |   |  |   |___ |       ||  | |  ||  | |  ||      _|
-|  _    ||  |_|  |  |   |  |    ___||  _   | |  |_|  ||  |_|  ||     |_
-| | |   ||       |  |   |  |   |___ | |_|   ||       ||       ||    _  |
-|_|  |__||_______|  |___|  |_______||_______||_______||_______||___| |_|`
+// wordmark is the Modular-font "Notebook" lettering shown atop the help output.
+var wordmark = []string{
+	` __    _  _______  _______  _______  _______  _______  _______  ___   _`,
+	`|  |  | ||       ||       ||       ||  _    ||       ||       ||   | | |`,
+	`|   |_| ||   _   ||_     _||    ___|| |_|   ||   _   ||   _   ||   |_| |`,
+	`|       ||  | |  |  |   |  |   |___ |       ||  | |  ||  | |  ||      _|`,
+	`|  _    ||  |_|  |  |   |  |    ___||  _   | |  |_|  ||  |_|  ||     |_`,
+	`| | |   ||       |  |   |  |   |___ | |_|   ||       ||       ||    _  |`,
+	`|_|  |__||_______|  |___|  |_______||_______||_______||_______||___| |_|`,
+}
+
+// notebookIcon is a small spiral notepad drawn to the right of the wordmark.
+var notebookIcon = []string{
+	` .---------.`,
+	` |o o o o o|`,
+	` |=========|`,
+	` | ------- |`,
+	` | ------- |`,
+	` | ------- |`,
+	` '---------'`,
+}
+
+// banner joins the wordmark and the notebook icon side by side, prefixed with a
+// blank line (matching the original leading newline in the help output).
+var banner = buildBanner()
+
+func buildBanner() string {
+	w := 0
+	for _, line := range wordmark {
+		if len(line) > w { // ASCII-only, so byte length is the visual width
+			w = len(line)
+		}
+	}
+	var b strings.Builder
+	b.WriteByte('\n')
+	for i, line := range wordmark {
+		icon := ""
+		if i < len(notebookIcon) {
+			icon = notebookIcon[i]
+		}
+		fmt.Fprintf(&b, "%-*s  %s\n", w, line, icon)
+	}
+	return strings.TrimRight(b.String(), "\n")
+}
 
 // resolveEngine applies the engine rule: flag, then $NB_TUI, then "tview".
 func resolveEngine(flag string) (string, error) {
@@ -79,7 +115,7 @@ func NewRootCmd(svc *todo.Service, launchTUI func(engine, theme string) error) *
 		},
 	}
 	tui.Flags().StringVarP(&engine, "engine", "e", "", `TUI engine: "tview" (default) or "bubble"; or $NB_TUI`)
-	tui.Flags().StringVar(&theme, "theme", "", `bubble theme: default, nord, dracula, gruvbox, mono; or $NB_THEME`)
+	tui.Flags().StringVar(&theme, "theme", "", `bubble theme: default, nord, dracula, gruvbox, mono, notebook, notebook-dark; or $NB_THEME`)
 	root.AddCommand(tui)
 	root.AddCommand(newAddCmd(svc))
 	root.AddCommand(newLsCmd(svc))

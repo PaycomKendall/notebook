@@ -71,14 +71,14 @@ func markFocus(box *tview.Box) {
 // buildUI constructs the three-pane layout.
 func (a *App) buildUI() {
 	a.lists = tview.NewList().ShowSecondaryText(false)
-	a.lists.SetBorder(true).SetTitle(" Lists ")
+	a.lists.SetBorder(true).SetTitle(" Folders ")
 	// Only highlight the selected row in the pane that has focus, so the eye
 	// lands on a single active selection rather than three at once.
 	a.lists.SetSelectedFocusOnly(true)
 	markFocus(a.lists.Box)
 
 	a.tasks = tview.NewList().ShowSecondaryText(false)
-	a.tasks.SetBorder(true).SetTitle(" Tasks ")
+	a.tasks.SetBorder(true).SetTitle(" Pages ")
 	a.tasks.SetSelectedFocusOnly(true)
 	markFocus(a.tasks.Box)
 
@@ -112,10 +112,10 @@ func (a *App) buildUI() {
 // footerHint returns the keybinding hint line for the focused pane.
 func footerHint(focusIdx int) string {
 	switch focusIdx {
-	case 0: // Lists
-		return " Tab: pane  ↑↓/jk: move  a: new list  r: rename  x: delete  q: quit"
-	case 1: // Tasks
-		return " Tab: pane  ↑↓/jk: move  a: add  d: done  e: edit  m: →list  x: delete  q: quit"
+	case 0: // Folders
+		return " Tab: pane  ↑↓/jk: move  a: new folder  r: rename  x: delete  q: quit"
+	case 1: // Pages
+		return " Tab: pane  ↑↓/jk: move  a: add  d: done  e: edit  m: →folder  x: delete  q: quit"
 	default: // Detail
 		return " Tab: pane  ↑↓: scroll  q: quit"
 	}

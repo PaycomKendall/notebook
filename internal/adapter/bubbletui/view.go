@@ -42,14 +42,22 @@ func (m *Model) paneHeight() int {
 func (m *Model) normalView() string {
 	row := lipgloss.JoinHorizontal(lipgloss.Top,
 		m.renderLists(), m.renderTasks(), m.renderDetail())
-	return row + "\n" + m.footer()
+	content := row + "\n" + m.footer()
+	// Paper themes flood the whole terminal (footer + margins below/right of the
+	// panes) with the page background so the notebook look runs edge to edge.
+	// Safe because every inner style also carries the page bg, so any style reset
+	// only ever exposes paper-on-paper. Terminal-native themes are unchanged.
+	if m.theme.bg != nil && m.width > 0 && m.height > 0 {
+		return m.styles.page.Width(m.width).Height(m.height).Render(content)
+	}
+	return content
 }
 
 func (m *Model) renderLists() string {
 	lw, _, _ := m.paneWidths()
 	focused := m.focus == focusLists
 	var b strings.Builder
-	b.WriteString(m.titleFor("Lists", focused) + "\n\n")
+	b.WriteString(m.titleFor("Folders", focused) + "\n\n")
 	for i, name := range m.listNames {
 		if i == m.listIdx {
 			b.WriteString(m.selRow("❯ "+name, focused) + "\n")
@@ -63,9 +71,9 @@ func (m *Model) renderLists() string {
 func (m *Model) renderTasks() string {
 	_, tw, _ := m.paneWidths()
 	focused := m.focus == focusTasks
-	title := "Tasks"
+	title := "Pages"
 	if n := m.currentListName(); n != "" {
-		title = "Tasks · " + n
+		title = "Pages · " + n
 	}
 	var b strings.Builder
 	b.WriteString(m.titleFor(title, focused) + "\n\n")
@@ -126,12 +134,23 @@ func (m *Model) notebookPage(title string, lines []string, contentW int) string 
 	gutter := m.styles.dim.Render(ndGutter)
 	margin := m.styles.tag.Render(ndMargin)
 	rule := lipgloss.NewStyle().Underline(true).Foreground(m.theme.subtle)
+	if m.theme.bg != nil {
+		rule = rule.Background(m.theme.bg)
+	}
 
 	if title == "" {
 		title = "Notebook"
 	}
 	var b strings.Builder
-	b.WriteString(gutter + margin + m.styles.title.Render(title) + "\n")
+	// Pad the header band to contentW like the ruled rows below it: the title is
+	// pre-styled (bold), so append separately-styled padding rather than letting
+	// the pane's block padding fill the gap — on paper themes that block padding
+	// arrives without the page background and punches a hole in the paper.
+	head := m.styles.title.Render(title)
+	if pad := contentW - lipgloss.Width(title); pad > 0 {
+		head += m.styles.dim.Render(strings.Repeat(" ", pad))
+	}
+	b.WriteString(gutter + margin + head + "\n")
 	b.WriteString(gutter + margin + m.styles.dim.Render(strings.Repeat("─", contentW)) + "\n")
 
 	// rows = pane height minus the Detail title (1), the blank line (1),
@@ -210,7 +229,7 @@ func (m *Model) footer() string {
 	case focusLists:
 		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "new"}, {"r", "rename"}, {"x", "delete"}, {"q", "quit"}})
 	case focusTasks:
-		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "add"}, {"d", "done"}, {"e", "edit"}, {"m", "→list"}, {"x", "delete"}, {"q", "quit"}})
+		return m.hint([][2]string{{"tab", "pane"}, {"↑/↓", "move"}, {"a", "add"}, {"d", "done"}, {"e", "edit"}, {"m", "→folder"}, {"x", "delete"}, {"q", "quit"}})
 	default:
 		return m.hint([][2]string{{"tab", "pane"}, {"q", "quit"}})
 	}

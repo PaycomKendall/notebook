@@ -41,7 +41,7 @@ func TestNormalViewShowsPanesAndFooter(t *testing.T) {
 	m.focus = focusTasks
 	out := m.View()
 
-	for _, want := range []string{"Lists", "work", "Tasks", "alpha", "beta", "[ ]", "Detail", "a note"} {
+	for _, want := range []string{"Folders", "work", "Pages", "alpha", "beta", "[ ]", "Detail", "a note"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("View missing %q\n%s", want, out)
 		}

@@ -9,8 +9,12 @@ import (
 )
 
 // Styles carries the lipgloss styles a host applies to each markdown element.
+// Base is the style used to hard-wrap/pad each line to the render width; hosts
+// that paint a page background set it so the padding carries that background
+// instead of falling back to the terminal default. Its zero value is a plain
+// style, so line padding is unstyled unless the host opts in.
 type Styles struct {
-	H1, H2, H3, Bold, Italic, Code, Bullet lipgloss.Style
+	H1, H2, H3, Bold, Italic, Code, Bullet, Base lipgloss.Style
 }
 
 var (
@@ -29,7 +33,7 @@ func Render(src string, width int, st Styles) string {
 	for _, raw := range lines {
 		styled := renderBlock(raw, st)
 		if width > 0 {
-			styled = lipgloss.NewStyle().Width(width).Render(styled)
+			styled = st.Base.Width(width).Render(styled)
 		}
 		out = append(out, styled)
 	}
