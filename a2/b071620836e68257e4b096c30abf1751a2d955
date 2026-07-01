@@ -1,0 +1,74 @@
+internal/adapter/bubbletui/forms.go
+  s_d7a1b6b41ddcad::t_749f4dc831b701 130
+  s_d7a1b6b41ddcad::t_c594c4d56a34ff 155
+  s_d7a1b6b41ddcad::t_5b36509c687d77 308,310,312,314,316
+  s_d7a1b6b41ddcad::t_f4e0230b49578b 280
+internal/adapter/tui/forms.go
+  s_d7a1b6b41ddcad::t_70bc060535be71 161
+  s_d7a1b6b41ddcad::t_11d85c8abfe5eb 125
+  s_d7a1b6b41ddcad::t_cb595a9f954ebd 184
+  s_d7a1b6b41ddcad::t_a5b3fa89a84832 116
+  s_d7a1b6b41ddcad::t_b421dd3bb24e36 87
+  s_d7a1b6b41ddcad::t_1e7c269f3dc70a 134
+  s_d7a1b6b41ddcad::t_41ac6a027d69f9 173
+  s_d7a1b6b41ddcad::t_879a51fdfc6fff 109
+internal/adapter/tui/app.go
+  s_d7a1b6b41ddcad::t_a5bcc3d4b02534 115-118
+  s_d7a1b6b41ddcad::t_b9bee38279c975 74
+  s_d7a1b6b41ddcad::t_14ecff6d4a04f0 81
+internal/adapter/bubbletui/view_test.go
+  s_d7a1b6b41ddcad::t_ad5c8f5000e5b2 44
+internal/adapter/bubbletui/theme_test.go
+  s_d7a1b6b41ddcad::t_3fbd84fefa16b6 26
+internal/adapter/bubbletui/theme.go
+  s_d7a1b6b41ddcad::t_1729b5302f1d42 106-108
+  s_d7a1b6b41ddcad::t_d273ff2adc50c0 119
+  s_d7a1b6b41ddcad::t_4086de6dd9d2e9 87-89,91-98
+  s_d7a1b6b41ddcad::t_410b5c39af51b0 73-86
+  s_d7a1b6b41ddcad::t_924b80faf5095d 102-105
+  s_d7a1b6b41ddcad::t_760c3eef332c26 9-11,19-20
+  s_d7a1b6b41ddcad::t_37ff44b7153f93 90,99-100
+internal/adapter/tui/footer_test.go
+  s_d7a1b6b41ddcad::t_d05a305e5cc063 43
+internal/adapter/bubbletui/paper_test.go
+  s_d7a1b6b41ddcad::t_8d89af20e4d0fc 9
+  s_d7a1b6b41ddcad::t_98de8607c787d5 1-8,10-47
+internal/adapter/cli/cli.go
+  s_d7a1b6b41ddcad::t_13c178f6a911f0 23-66
+  s_d7a1b6b41ddcad::t_7b461eb250c309 118
+  s_d7a1b6b41ddcad::t_8abd5d52992795 6
+internal/adapter/bubbletui/styles.go
+  s_d7a1b6b41ddcad::t_12e56a35678552 11,14-19,21-40,42,46-47,51-59
+  s_d7a1b6b41ddcad::t_c1458bbffae8f2 79
+  s_d7a1b6b41ddcad::t_4eab34154a7272 64-65,67-70,72-76
+internal/markdown/markdown.go
+  s_d7a1b6b41ddcad::t_728224856a24b6 12-15,17
+  s_d7a1b6b41ddcad::t_180b0ccfaabaf3 36
+internal/adapter/bubbletui/view.go
+  s_d7a1b6b41ddcad::t_76d4717daa08ef 232
+  s_d7a1b6b41ddcad::t_a7bc00c441f2e3 145-153
+  s_d7a1b6b41ddcad::t_9648b27569f1d6 60
+  s_d7a1b6b41ddcad::t_96ca7d9c54b761 74,76
+  s_d7a1b6b41ddcad::t_b9202c62f78781 137-139
+  s_d7a1b6b41ddcad::t_4c980fb61aee20 45-53
+internal/adapter/bubbletui/forms_test.go
+  s_d7a1b6b41ddcad::t_c61910f43a32fe 145
+README.md
+  s_d7a1b6b41ddcad::t_85c410af4aa6d9 25
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "a2b071620836e68257e4b096c30abf1751a2d955",
+  "prompts": {},
+  "sessions": {
+    "s_d7a1b6b41ddcad": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7434637a-8140-4b48-91f6-f6ad8649c748",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
