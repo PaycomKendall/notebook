@@ -14,7 +14,7 @@ Set FontSize 16
 Set Width 1200
 Set Height 700
 Set Padding 20
-Set Theme "nord"
+Set Theme "GitHub Dark"
 
 # --- Setup (hidden from the recording): isolated data dir + sample tasks ---
 Hide
@@ -27,25 +27,34 @@ Type "clear" Enter
 Show
 
 # --- Demo ---
-Type "nb tui --engine bubble --theme nord" Enter
+Type "nb tui --engine bubble --theme notebook-dark" Enter
 Sleep 2s
 
-# Move down through the task list
-Down@500ms 2
-Sleep 1s
-
-# Toggle a task done, then back
-Type "d"
+# Hop to the Folders pane and switch to the "inbox" folder
+Shift+Tab
+Sleep 800ms
+Down@500ms 1
 Sleep 1200ms
-Type "d"
-Sleep 1s
 
-# Switch to the Detail pane to show the note
-Tab
-Sleep 1500ms
-
-# Back to Tasks and quit
+# Into the Pages list; move down through the pages
 Tab
 Sleep 800ms
+Down@450ms 2
+Sleep 900ms
+
+# Toggle a page done, then undo
+Type "d"
+Sleep 1100ms
+Type "d"
+Sleep 900ms
+
+# Back up to the page that has a note
+Up@450ms 2
+Sleep 900ms
+
+# Open it on the ruled notebook page in the Detail pane
+Tab
+Sleep 2500ms
+
 Type "q"
 Sleep 1s
