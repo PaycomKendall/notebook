@@ -3,6 +3,10 @@
 A task tracker with a full CLI and an interactive three-pane TUI, built in Go
 using a hexagonal (ports & adapters) architecture.
 
+![notebook TUI demo](docs/demo.gif)
+
+<sub>Preview generated with [VHS](https://github.com/charmbracelet/vhs) — run `vhs demo.tape` to regenerate.</sub>
+
 ## Install
 
     brew install go            # if not already installed
