@@ -75,7 +75,7 @@ func (m *Model) renderTasks() string {
 			if task.Done {
 				box = "[x]"
 			}
-			line := fmt.Sprintf("%s #%d %s", box, task.ID, task.Title)
+			line := fmt.Sprintf("%s %s", box, task.Title)
 			if len(task.Tags) > 0 {
 				line += "  #" + strings.Join(task.Tags, " #")
 			}
