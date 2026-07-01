@@ -1,0 +1,19 @@
+internal/adapter/bubbletui/view.go
+  s_356000c4f428cf::t_b2cda5397c80b2 78
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.8",
+  "base_commit_sha": "e349ba8c00d1be8c31df967c2df2260e4dc5994f",
+  "prompts": {},
+  "sessions": {
+    "s_356000c4f428cf": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c8f7fdf-dfd6-427d-8f6a-2488ca1df3e9",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
