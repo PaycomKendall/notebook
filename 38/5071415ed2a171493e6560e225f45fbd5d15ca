@@ -1,0 +1,21 @@
+internal/adapter/bubbletui/gopher.go
+  s_4c0e08888aa554::t_5d1d18a3cad569 1-29
+internal/adapter/bubbletui/gopher_test.go
+  s_4c0e08888aa554::t_63c8d7dd6d4dcd 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "385071415ed2a171493e6560e225f45fbd5d15ca",
+  "prompts": {},
+  "sessions": {
+    "s_4c0e08888aa554": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdf37cf2-71d6-4df8-945b-1456a73b8241",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
