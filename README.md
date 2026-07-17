@@ -3,6 +3,10 @@
 A task tracker with a full CLI and an interactive three-pane TUI, built in Go
 using a hexagonal (ports & adapters) architecture.
 
+<p align="center">
+  <img src="docs/logo.png" alt="notebook gopher" width="240">
+</p>
+
 ![notebook TUI demo](docs/demo.gif)
 
 <sub>Preview generated with [VHS](https://github.com/charmbracelet/vhs) — run `vhs demo.tape` to regenerate.</sub>
