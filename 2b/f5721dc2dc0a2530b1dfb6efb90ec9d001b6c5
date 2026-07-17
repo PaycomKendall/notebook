@@ -1,0 +1,26 @@
+internal/adapter/bubbletui/view.go
+  s_4c0e08888aa554::t_d0593535c98d48 18-19
+  s_4c0e08888aa554::t_706294442b4971 58-65
+internal/adapter/bubbletui/model.go
+  s_4c0e08888aa554::t_e078853e7426c7 26
+internal/adapter/bubbletui/gopher_test.go
+  s_4c0e08888aa554::t_95a2b82f4df248 60-70
+internal/adapter/bubbletui/gopher.go
+  s_4c0e08888aa554::t_b7f10269319426 107-128
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "2bf5721dc2dc0a2530b1dfb6efb90ec9d001b6c5",
+  "prompts": {},
+  "sessions": {
+    "s_4c0e08888aa554": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdf37cf2-71d6-4df8-945b-1456a73b8241",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
