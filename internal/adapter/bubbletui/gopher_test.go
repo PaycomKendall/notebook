@@ -2,10 +2,14 @@ package bubbletui
 
 import (
 	"image"
+	"image/color"
 	"strings"
 	"testing"
 
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/kendallowen/notebook/internal/todo"
+	"github.com/muesli/termenv"
 )
 
 func TestGopherImageDecodes(t *testing.T) {
@@ -57,6 +61,51 @@ func TestHalfBlocksGridShape(t *testing.T) {
 	}
 	if n := strings.Count(out, "▀"); n != 4 {
 		t.Errorf("got %d half-block glyphs, want 4", n)
+	}
+}
+
+func TestHalfBlocksEmitsExactColors(t *testing.T) {
+	lipgloss.SetColorProfile(termenv.TrueColor)
+	defer lipgloss.SetColorProfile(termenv.Ascii)
+
+	// 1 wide x 2 tall: top pixel and bottom pixel are distinct known colors.
+	img := image.NewRGBA(image.Rect(0, 0, 1, 2))
+	img.Set(0, 0, color.RGBA{10, 20, 30, 255})    // top -> foreground
+	img.Set(0, 1, color.RGBA{200, 150, 100, 255}) // bottom -> background
+	out := halfBlocks(img)
+
+	// hexOf's >>8 shift must yield the raw 8-bit components, and lipgloss must
+	// render them as decimal truecolor escapes: fg=top, bg=bottom (not swapped).
+	if !strings.Contains(out, "38;2;10;20;30") {
+		t.Errorf("missing top-pixel foreground escape 38;2;10;20;30 in %q", out)
+	}
+	if !strings.Contains(out, "48;2;200;150;100") {
+		t.Errorf("missing bottom-pixel background escape 48;2;200;150;100 in %q", out)
+	}
+	if !strings.Contains(out, "▀") {
+		t.Errorf("missing half-block glyph in %q", out)
+	}
+}
+
+func TestRenderGopherGuardReturnsSingleHintLine(t *testing.T) {
+	out := renderGopher(1, 1)
+	if lines := strings.Split(out, "\n"); len(lines) != 1 {
+		t.Fatalf("got %d lines, want 1 (out=%q)", len(lines), out)
+	}
+	if !strings.Contains(out, "press any key to return") {
+		t.Errorf("guard output missing hint text: %q", out)
+	}
+}
+
+func TestGopherCtrlCQuits(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.mode = modeGopher
+	cmd := send(m, key("ctrl+c"))
+	if cmd == nil {
+		t.Fatal("ctrl+c in gopher mode should return a quit command")
+	}
+	if _, ok := cmd().(tea.QuitMsg); !ok {
+		t.Error("ctrl+c command should produce tea.QuitMsg")
 	}
 }
 

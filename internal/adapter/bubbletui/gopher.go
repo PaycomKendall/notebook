@@ -111,18 +111,19 @@ const gopherHint = "press any key to return"
 // scaled to fit (reserving one row for the hint), horizontally and vertically
 // centered, with the dismiss hint beneath it.
 func renderGopher(width, height int) string {
+	hint := lipgloss.NewStyle().Faint(true).Render(gopherHint)
 	if width < 2 || height < 3 {
-		return lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, gopherHint)
+		return lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, hint)
 	}
 	img := gopherImage()
 	if img == nil {
-		return lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, gopherHint)
+		return lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, hint)
 	}
 	b := img.Bounds()
 	// height-1 text rows for the image (1 row reserved for the hint), each row
 	// holds 2 vertical pixels.
 	w, h := fitDims(b.Dx(), b.Dy(), width, (height-1)*2)
 	art := halfBlocks(scaleNearest(img, w, h))
-	block := lipgloss.JoinVertical(lipgloss.Center, art, gopherHint)
+	block := lipgloss.JoinVertical(lipgloss.Center, art, hint)
 	return lipgloss.Place(width, height, lipgloss.Center, lipgloss.Center, block)
 }
