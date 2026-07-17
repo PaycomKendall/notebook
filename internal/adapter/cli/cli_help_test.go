@@ -19,7 +19,7 @@ func runRoot(t *testing.T, args ...string) (out string, tuiLaunched bool, err er
 	}
 	svc := todo.NewService(store)
 	launched := false
-	cmd := NewRootCmd(svc, func(string, string) error { launched = true; return nil })
+	cmd := NewRootCmd(svc, func(string) error { launched = true; return nil })
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
 	cmd.SetErr(&buf)
