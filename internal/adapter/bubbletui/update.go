@@ -15,12 +15,24 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch m.mode {
 		case modeConfirm:
 			return m.updateConfirm(msg)
+		case modeGopher:
+			return m.updateGopher(msg)
 		case modeNormal:
 			return m.updateNormal(msg)
 		default:
 			return m.updateForm(msg)
 		}
 	}
+	return m, nil
+}
+
+// updateGopher dismisses the gopher easter egg on any key (ctrl+c still quits),
+// restoring the normal view with focus and selection untouched.
+func (m *Model) updateGopher(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	if msg.String() == "ctrl+c" {
+		return m, tea.Quit
+	}
+	m.mode = modeNormal
 	return m, nil
 }
 

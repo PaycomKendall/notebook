@@ -4,6 +4,8 @@ import (
 	"image"
 	"strings"
 	"testing"
+
+	"github.com/kendallowen/notebook/internal/todo"
 )
 
 func TestGopherImageDecodes(t *testing.T) {
@@ -66,5 +68,40 @@ func TestRenderGopherFillsViewport(t *testing.T) {
 	}
 	if !strings.Contains(out, "press any key to return") {
 		t.Error("missing dismiss hint")
+	}
+}
+
+func TestGopherTitleTriggersEasterEgg(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.openAddTask()
+	typeStr(m, "gopher")
+	m.updateForm(key("enter"))
+	if m.mode != modeGopher {
+		t.Fatalf("mode = %v, want modeGopher", m.mode)
+	}
+}
+
+func TestNonGopherTitleDoesNotTrigger(t *testing.T) {
+	for _, title := range []string{"Gopher", "gopher notes", "gophers"} {
+		m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+		m.openAddTask()
+		typeStr(m, title)
+		m.updateForm(key("enter"))
+		if m.mode != modeNormal {
+			t.Errorf("title %q: mode = %v, want modeNormal", title, m.mode)
+		}
+	}
+}
+
+func TestGopherDismissedByAnyKey(t *testing.T) {
+	m, _ := newTestModel(t, func(s *todo.Service) { _ = s.CreateList("work") })
+	m.focus = focusTasks
+	m.mode = modeGopher
+	m.Update(key("j"))
+	if m.mode != modeNormal {
+		t.Fatalf("mode = %v, want modeNormal", m.mode)
+	}
+	if m.focus != focusTasks {
+		t.Errorf("focus = %v, want unchanged focusTasks", m.focus)
 	}
 }

@@ -168,12 +168,16 @@ func (m *Model) submitForm() {
 		}
 		tags := strings.Fields(m.inputs[1].Value())
 		notes := m.inputs[2].Value()
-		if _, err := m.svc.AddTask(m.formList, title, tags, notes); err != nil {
+		_, err := m.svc.AddTask(m.formList, title, tags, notes)
+		if err != nil {
 			m.status = err.Error()
 		}
 		m.closeForm()
 		m.reloadLists()
 		m.reloadTasks()
+		if err == nil && title == "gopher" {
+			m.mode = modeGopher // easter egg; closeForm reset mode to normal
+		}
 	case modeEditTask:
 		title := strings.TrimSpace(m.inputs[0].Value())
 		if title == "" {
