@@ -15,6 +15,8 @@ func (m *Model) View() string {
 		return m.formView()
 	case modeConfirm:
 		return m.confirmView()
+	case modeGopher:
+		return m.gopherView()
 	default:
 		return m.normalView()
 	}
@@ -47,6 +49,14 @@ func (m *Model) normalView() string {
 	// panes) with the page background so the notebook look runs edge to edge.
 	// Safe because every inner style also carries the page bg, so any style reset
 	// only ever exposes paper-on-paper. Terminal-native themes are unchanged.
+	if m.theme.bg != nil && m.width > 0 && m.height > 0 {
+		return m.styles.page.Width(m.width).Height(m.height).Render(content)
+	}
+	return content
+}
+
+func (m *Model) gopherView() string {
+	content := renderGopher(m.width, m.height)
 	if m.theme.bg != nil && m.width > 0 && m.height > 0 {
 		return m.styles.page.Width(m.width).Height(m.height).Render(content)
 	}

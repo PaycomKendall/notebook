@@ -57,3 +57,14 @@ func TestHalfBlocksGridShape(t *testing.T) {
 		t.Errorf("got %d half-block glyphs, want 4", n)
 	}
 }
+
+func TestRenderGopherFillsViewport(t *testing.T) {
+	out := renderGopher(80, 24)
+	lines := strings.Split(out, "\n")
+	if len(lines) != 24 {
+		t.Fatalf("got %d lines, want 24", len(lines))
+	}
+	if !strings.Contains(out, "press any key to return") {
+		t.Error("missing dismiss hint")
+	}
+}
