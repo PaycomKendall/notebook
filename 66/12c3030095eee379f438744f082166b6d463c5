@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-17-remove-tview-bubble-only-design.md
+  s_4c0e08888aa554::t_c18a1cc63cb2c5 1-115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "6612c3030095eee379f438744f082166b6d463c5",
+  "prompts": {},
+  "sessions": {
+    "s_4c0e08888aa554": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdf37cf2-71d6-4df8-945b-1456a73b8241",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
