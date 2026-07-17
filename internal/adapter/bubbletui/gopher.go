@@ -3,9 +3,14 @@ package bubbletui
 import (
 	"bytes"
 	_ "embed"
+	"fmt"
 	"image"
+	"image/color"
 	"image/jpeg"
+	"strings"
 	"sync"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 //go:embed gopher.jpg
@@ -65,4 +70,37 @@ func scaleNearest(src image.Image, w, h int) *image.RGBA {
 		}
 	}
 	return dst
+}
+
+// halfBlockCell renders one terminal cell as an upper half-block whose
+// foreground is the top pixel and background is the bottom pixel.
+func halfBlockCell(top, bottom color.Color) string {
+	return lipgloss.NewStyle().
+		Foreground(lipgloss.Color(hexOf(top))).
+		Background(lipgloss.Color(hexOf(bottom))).
+		Render("▀")
+}
+
+func hexOf(c color.Color) string {
+	r, g, b, _ := c.RGBA() // 16-bit per channel
+	return fmt.Sprintf("#%02x%02x%02x", r>>8, g>>8, b>>8)
+}
+
+// halfBlocks converts img into rows of half-block cells. Each cell packs two
+// vertical pixels; source rows are consumed in pairs. A dangling final row
+// (odd height) is dropped.
+func halfBlocks(img image.Image) string {
+	b := img.Bounds()
+	w, h := b.Dx(), b.Dy()
+	var rows []string
+	for y := 0; y+1 < h; y += 2 {
+		var sb strings.Builder
+		for x := 0; x < w; x++ {
+			top := img.At(b.Min.X+x, b.Min.Y+y)
+			bottom := img.At(b.Min.X+x, b.Min.Y+y+1)
+			sb.WriteString(halfBlockCell(top, bottom))
+		}
+		rows = append(rows, sb.String())
+	}
+	return strings.Join(rows, "\n")
 }

@@ -2,6 +2,7 @@ package bubbletui
 
 import (
 	"image"
+	"strings"
 	"testing"
 )
 
@@ -41,5 +42,18 @@ func TestScaleNearestOutputDimensions(t *testing.T) {
 	dst := scaleNearest(src, 2, 2)
 	if b := dst.Bounds(); b.Dx() != 2 || b.Dy() != 2 {
 		t.Fatalf("scaled bounds = %v, want 2x2", b)
+	}
+}
+
+func TestHalfBlocksGridShape(t *testing.T) {
+	// 2 wide x 4 tall -> 2 cell rows of 2 cells each.
+	img := image.NewRGBA(image.Rect(0, 0, 2, 4))
+	out := halfBlocks(img)
+	lines := strings.Split(out, "\n")
+	if len(lines) != 2 {
+		t.Fatalf("got %d cell rows, want 2 (out=%q)", len(lines), out)
+	}
+	if n := strings.Count(out, "▀"); n != 4 {
+		t.Errorf("got %d half-block glyphs, want 4", n)
 	}
 }
