@@ -65,26 +65,9 @@ func buildBanner() string {
 	return strings.TrimRight(b.String(), "\n")
 }
 
-// resolveEngine applies the engine rule: flag, then $NB_TUI, then "tview".
-func resolveEngine(flag string) (string, error) {
-	e := flag
-	if e == "" {
-		e = os.Getenv("NB_TUI")
-	}
-	if e == "" {
-		e = "tview"
-	}
-	switch e {
-	case "tview", "bubble":
-		return e, nil
-	default:
-		return "", fmt.Errorf("invalid engine %q (want \"tview\" or \"bubble\")", e)
-	}
-}
-
-// NewRootCmd builds the command tree. launchTUI runs the interactive UI for
-// the chosen engine; bare `nb` prints help.
-func NewRootCmd(svc *todo.Service, launchTUI func(engine, theme string) error) *cobra.Command {
+// NewRootCmd builds the command tree. launchTUI runs the interactive UI;
+// bare `nb` prints help.
+func NewRootCmd(svc *todo.Service, launchTUI func(theme string) error) *cobra.Command {
 	root := &cobra.Command{
 		Use:           "nb",
 		Short:         "notebook — a CLI + TUI task tracker",
@@ -95,15 +78,11 @@ func NewRootCmd(svc *todo.Service, launchTUI func(engine, theme string) error) *
 			return cmd.Help()
 		},
 	}
-	var engine, theme string
+	var theme string
 	tui := &cobra.Command{
 		Use:   "tui",
 		Short: "Launch the interactive TUI",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			eng, err := resolveEngine(engine)
-			if err != nil {
-				return err
-			}
 			th := theme
 			if th == "" {
 				th = os.Getenv("NB_THEME")
@@ -111,11 +90,10 @@ func NewRootCmd(svc *todo.Service, launchTUI func(engine, theme string) error) *
 			if th == "" {
 				th = "default"
 			}
-			return launchTUI(eng, th)
+			return launchTUI(th)
 		},
 	}
-	tui.Flags().StringVarP(&engine, "engine", "e", "", `TUI engine: "tview" (default) or "bubble"; or $NB_TUI`)
-	tui.Flags().StringVar(&theme, "theme", "", `bubble theme: default, nord, dracula, gruvbox, mono, notebook, notebook-dark; or $NB_THEME`)
+	tui.Flags().StringVar(&theme, "theme", "", `theme: default, nord, dracula, gruvbox, mono, notebook, notebook-dark; or $NB_THEME`)
 	root.AddCommand(tui)
 	root.AddCommand(newAddCmd(svc))
 	root.AddCommand(newLsCmd(svc))

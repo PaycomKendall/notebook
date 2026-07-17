@@ -17,7 +17,7 @@ func runTheme(t *testing.T, env string, args ...string) (theme string, err error
 	}
 	svc := todo.NewService(store)
 	got := ""
-	cmd := NewRootCmd(svc, func(_, th string) error { got = th; return nil })
+	cmd := NewRootCmd(svc, func(th string) error { got = th; return nil })
 	var buf bytes.Buffer
 	cmd.SetOut(&buf)
 	cmd.SetErr(&buf)

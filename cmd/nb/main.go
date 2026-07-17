@@ -7,7 +7,6 @@ import (
 	"github.com/kendallowen/notebook/internal/adapter/bubbletui"
 	"github.com/kendallowen/notebook/internal/adapter/cli"
 	"github.com/kendallowen/notebook/internal/adapter/jsonstore"
-	"github.com/kendallowen/notebook/internal/adapter/tui"
 	"github.com/kendallowen/notebook/internal/todo"
 )
 
@@ -20,11 +19,8 @@ func main() {
 	}
 	svc := todo.NewService(store)
 
-	launchTUI := func(engine, theme string) error {
-		if engine == "bubble" {
-			return bubbletui.Run(svc, theme)
-		}
-		return tui.New(svc).Run()
+	launchTUI := func(theme string) error {
+		return bubbletui.Run(svc, theme)
 	}
 
 	root := cli.NewRootCmd(svc, launchTUI)
