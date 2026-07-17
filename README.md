@@ -1,10 +1,12 @@
-# notebook (`nb`)
+<p align="center">
+  <img src="docs/logo.png" alt="notebook gopher" width="200">
+</p>
 
-A task tracker with a full CLI and an interactive three-pane TUI, built in Go
-using a hexagonal (ports & adapters) architecture.
+<h1 align="center">notebook (<code>nb</code>)</h1>
 
 <p align="center">
-  <img src="docs/logo.png" alt="notebook gopher" width="240">
+  A task tracker with a full CLI and an interactive three-pane TUI, built in Go<br>
+  using a hexagonal (ports &amp; adapters) architecture.
 </p>
 
 ![notebook TUI demo](docs/demo.gif)
