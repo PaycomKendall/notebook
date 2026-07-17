@@ -1,11 +1,11 @@
 # demo.tape — generates the README preview GIF for the notebook TUI.
 #
 # Requires: brew install vhs ffmpeg   (and `go install ./cmd/nb` so `nb` is on PATH)
-# Run:      vhs demo.tape             -> writes docs/demo.gif
+# Run:      vhs demo.tape             -> writes docs/demo-tui.gif
 #
 # Re-run whenever the UI changes to regenerate a fresh preview.
 
-Output docs/demo.gif
+Output docs/demo-tui.gif
 
 Require nb
 

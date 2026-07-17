@@ -9,7 +9,7 @@
   using a hexagonal (ports &amp; adapters) architecture.
 </p>
 
-![notebook TUI demo](docs/demo.gif)
+![notebook TUI demo](docs/demo-tui.gif)
 
 <sub>Preview generated with [VHS](https://github.com/charmbracelet/vhs) — run `vhs demo.tape` to regenerate.</sub>
 
