@@ -1,0 +1,21 @@
+demo.tape
+  s_4c0e08888aa554::t_ecb17d80f2a07f 30
+README.md
+  s_4c0e08888aa554::t_5389f5ff77aac6 29-30
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "7a2012a66957f83d1b23739e62a592f6965916bc",
+  "prompts": {},
+  "sessions": {
+    "s_4c0e08888aa554": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdf37cf2-71d6-4df8-945b-1456a73b8241",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
