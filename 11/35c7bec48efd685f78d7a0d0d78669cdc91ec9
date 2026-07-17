@@ -1,0 +1,19 @@
+README.md
+  s_4c0e08888aa554::t_16feb9a9d106b1 6-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "1135c7bec48efd685f78d7a0d0d78669cdc91ec9",
+  "prompts": {},
+  "sessions": {
+    "s_4c0e08888aa554": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdf37cf2-71d6-4df8-945b-1456a73b8241",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
