@@ -23,6 +23,7 @@ const (
 	modeRenameList
 	modeMoveTask
 	modeConfirm
+	modeGopher
 )
 
 // Model is the Bubble Tea front-end over the shared Service.
