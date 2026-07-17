@@ -1,0 +1,19 @@
+docs/superpowers/specs/2026-07-17-gopher-easter-egg-design.md
+  s_4c0e08888aa554::t_ebfa234c3c39df 1-101
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "7aacd824478d4a600da9af42bbee3a9b2f626a1d",
+  "prompts": {},
+  "sessions": {
+    "s_4c0e08888aa554": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fdf37cf2-71d6-4df8-945b-1456a73b8241",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "kendall.owen <kendall.owen@paycomonline.com>"
+    }
+  }
+}
