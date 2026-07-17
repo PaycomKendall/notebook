@@ -27,7 +27,7 @@ Type "clear" Enter
 Show
 
 # --- Demo ---
-Type "nb tui --engine bubble --theme notebook-dark" Enter
+Type "nb tui --theme notebook-dark" Enter
 Sleep 2s
 
 # Hop to the Folders pane and switch to the "inbox" folder
