@@ -26,8 +26,8 @@ or `~/.local/share/notebook`. Point `NB_DIR` at a git repo to version your notes
 ## CLI
 
     nb                       # show help (banner + commands)
-    nb tui                        # launch the interactive TUI
-    nb tui --theme nord           # themes: default, nord, dracula, gruvbox, mono, notebook, notebook-dark (or NB_THEME)
+    nb tui                   # launch the interactive TUI
+    nb tui --theme nord      # themes: default, nord, dracula, gruvbox, mono, notebook, notebook-dark (or NB_THEME)
     nb add "buy milk" -l groceries -t store -n "2%"
     nb ls [-l list | -a] [-t tag] [--done|--open]
     nb done 3 [-l list]
